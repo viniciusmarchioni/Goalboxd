@@ -10,10 +10,12 @@ class UserProfile extends StatefulWidget {
   State<StatefulWidget> createState() => _UserProfileState();
 }
 
-class _UserProfileState extends State<UserProfile> {
+class _UserProfileState extends State<UserProfile>
+    with TickerProviderStateMixin {
   final _controller = ScrollController();
+  late final TabController _tabController;
   List<dynamic> comments = [];
-  UserView? user; // Alterado para permitir null
+  UserView? user;
   bool fim = false;
   int page = 0;
   int atual = 0;
@@ -21,6 +23,7 @@ class _UserProfileState extends State<UserProfile> {
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 2, vsync: this);
     _controller.addListener(() {
       if (_controller.position.pixels == _controller.position.maxScrollExtent &&
           !fim) {
@@ -40,13 +43,6 @@ class _UserProfileState extends State<UserProfile> {
   void dispose() {
     super.dispose();
     _controller.dispose();
-  }
-
-  featchUser() async {
-    user = await _getUser();
-    setState(() {
-      user = user;
-    });
   }
 
   featch() async {
@@ -97,26 +93,27 @@ class _UserProfileState extends State<UserProfile> {
                       ),
                     ],
                   )),
-              NavigationBar(
-                  selectedIndex: atual,
-                  destinations: const [
-                    NavigationDestination(
-                        icon: Icon(Icons.star), label: 'Avaliações'),
-                    NavigationDestination(
-                        icon: Icon(Icons.comment_rounded), label: 'Comentários')
-                  ],
-                  labelBehavior:
-                      NavigationDestinationLabelBehavior.onlyShowSelected,
-                  onDestinationSelected: (value) {
-                    setState(() {
-                      atual = value;
-                    });
-                  }),
-              if (atual == 0)
-                Container()
-              else
-                Expanded(
-                    child: ListView.builder(
+              TabBar(
+                controller: _tabController,
+                tabs: const [
+                  Tab(
+                    icon: Icon(Icons.star_border_rounded),
+                    text: "Avaliações",
+                  ),
+                  Tab(
+                    icon: Icon(Icons.comment),
+                    text: "Comentários",
+                  ),
+                ],
+                indicatorColor: Colors.blue,
+                labelColor: Colors.blue,
+                overlayColor: const MaterialStatePropertyAll(
+                    Color.fromARGB(126, 61, 140, 206)),
+              ),
+              Expanded(
+                  child: TabBarView(controller: _tabController, children: [
+                Container(),
+                ListView.builder(
                   controller: _controller,
                   itemCount: comments.length,
                   itemBuilder: (context, index) {
@@ -144,7 +141,8 @@ class _UserProfileState extends State<UserProfile> {
                           ],
                         ));
                   },
-                ))
+                )
+              ]))
             ]),
     );
   }
