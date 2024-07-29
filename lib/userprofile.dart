@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -12,34 +11,55 @@ class UserProfile extends StatefulWidget {
 }
 
 class _UserProfileState extends State<UserProfile> {
-  final controller = ScrollController();
-  var comentarios = [];
+  final _controller = ScrollController();
+  List<dynamic> comments = [];
+  UserView? user; // Alterado para permitir null
   bool fim = false;
-  int teste = 0;
+  int page = 0;
   int atual = 0;
 
   @override
   void initState() {
     super.initState();
-    controller.addListener(() {
-      if (controller.position.pixels == controller.position.maxScrollExtent &&
+    _controller.addListener(() {
+      if (_controller.position.pixels == _controller.position.maxScrollExtent &&
           !fim) {
         debugPrint("AQUII");
         featch();
       }
     });
+    featch();
+    _getUser().then((value) {
+      setState(() {
+        user = value;
+      });
+    });
   }
 
-  Future featch() async {
-    var novosComentarios = await Requests.getProfileComment(25, teste);
+  @override
+  void dispose() {
+    super.dispose();
+    _controller.dispose();
+  }
+
+  featchUser() async {
+    user = await _getUser();
     setState(() {
-      teste += 5;
-      if (novosComentarios.length < 5) {
-        fim = true;
-      }
-      comentarios.add(novosComentarios);
+      user = user;
     });
-    return true;
+  }
+
+  featch() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    List x = await Requests.getProfileComment(prefs.getInt('id')!, page);
+    comments.addAll(x);
+    setState(() {
+      if (x.length < 10) {
+        fim = false;
+      }
+      comments = comments;
+    });
+    page += 10;
   }
 
   @override
@@ -51,100 +71,87 @@ class _UserProfileState extends State<UserProfile> {
             decoration: const BoxDecoration(
                 gradient: LinearGradient(colors: [Colors.blue, Colors.white]))),
       ),
-      body: Column(children: [
-        Container(
-          decoration: const BoxDecoration(
-              gradient: LinearGradient(colors: [Colors.blue, Colors.white])),
-          child: FutureBuilder(
-            future: _getUser(),
-            builder: (context, snapshot) {
-              return Column(
-                children: [
-                  CircleAvatar(
-                      maxRadius: 50,
-                      backgroundImage: NetworkImage(snapshot.data?.urlImage ??
-                          'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')),
-                  Center(
-                    child: Text(snapshot.data?.username ?? 'Null'),
-                  ),
-                  Center(
-                    child: Text(
-                        "Avaliações: ${(snapshot.data?.qtdNota ?? 0).toString()}"),
-                  ),
-                  Center(
-                    child: Text(
-                        "Comentários: ${(snapshot.data?.qtdComentarios ?? 0).toString()}"),
-                  ),
-                ],
-              );
-            },
-          ),
-        ),
-        NavigationBar(
-            selectedIndex: atual,
-            destinations: const [
-              NavigationDestination(
-                  icon: Icon(Icons.star), label: 'Avaliações'),
-              NavigationDestination(
-                  icon: Icon(Icons.comment_rounded), label: 'Comentários')
-            ],
-            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-            onDestinationSelected: (value) {
-              setState(() {
-                atual = value;
-              });
-            }),
-        if (atual == 1)
-          FutureBuilder(
-            future: Requests.getProfileComment(25, teste),
-            builder: (context, snapshot) {
-              if (snapshot.hasError) {
-                debugPrint('=============ERRO=============');
-                return const Center(child: Text('Erro'));
-              }
-              if (snapshot.connectionState == ConnectionState.done) {
-                comentarios += snapshot.data ?? [];
-                debugPrint(
-                    "===================${comentarios.length}========================");
-
-                return Expanded(
-                    child: ListView(
-                  controller: controller,
-                  children: [
-                    for (var profileGame in comentarios)
-                      if (profileGame is ProfileGame)
-                        Container(
-                          decoration: BoxDecoration(
-                              border: Border.all(color: Colors.black12)),
-                          margin: const EdgeInsets.only(bottom: 100),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(profileGame.comment),
-                              Text(
-                                  '${profileGame.game.team1name}x${profileGame.game.team2name}')
-                            ],
-                          ),
-                        )
+      body: user == null
+          ? const Center(child: CircularProgressIndicator())
+          : Column(children: [
+              Container(
+                  decoration: const BoxDecoration(
+                      gradient:
+                          LinearGradient(colors: [Colors.blue, Colors.white])),
+                  child: Column(
+                    children: [
+                      CircleAvatar(
+                          maxRadius: 50,
+                          backgroundImage: NetworkImage(user?.urlImage ??
+                              'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')),
+                      Center(
+                        child: Text(user?.username ?? ''),
+                      ),
+                      Center(
+                        child: Text(
+                            "Avaliações: ${(user?.qtdNota ?? 0).toString()}"),
+                      ),
+                      Center(
+                        child: Text(
+                            "Comentários: ${(user?.qtdComentarios ?? 0).toString()}"),
+                      ),
+                    ],
+                  )),
+              NavigationBar(
+                  selectedIndex: atual,
+                  destinations: const [
+                    NavigationDestination(
+                        icon: Icon(Icons.star), label: 'Avaliações'),
+                    NavigationDestination(
+                        icon: Icon(Icons.comment_rounded), label: 'Comentários')
                   ],
-                ));
-              } else {
-                return const CircularProgressIndicator();
-              }
-            },
-          )
-      ]),
+                  labelBehavior:
+                      NavigationDestinationLabelBehavior.onlyShowSelected,
+                  onDestinationSelected: (value) {
+                    setState(() {
+                      atual = value;
+                    });
+                  }),
+              if (atual == 0)
+                Container()
+              else
+                Expanded(
+                    child: ListView.builder(
+                  controller: _controller,
+                  itemCount: comments.length,
+                  itemBuilder: (context, index) {
+                    return Container(
+                        margin: const EdgeInsets.only(bottom: 50),
+                        child: Row(
+                          children: [
+                            Container(
+                              margin: const EdgeInsets.all(5),
+                              child: CircleAvatar(
+                                  backgroundImage: NetworkImage(user
+                                          ?.urlImage ??
+                                      'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')),
+                            ),
+                            Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(user?.username ?? ''),
+                                Text(comments[index].comment),
+                                Text(comments[index].game.team1name +
+                                    " x " +
+                                    comments[index].game.team2name)
+                              ],
+                            ),
+                          ],
+                        ));
+                  },
+                ))
+            ]),
     );
   }
 }
 
 Future<UserView> _getUser() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
-
-  try {
-    UserView user = await Requests.getProfile(prefs.getInt('id')!);
-    return user;
-  } catch (e) {
-    throw 'Erro: $e';
-  }
+  UserView user = await Requests.getProfile(prefs.getInt('id')!);
+  return user;
 }
