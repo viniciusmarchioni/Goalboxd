@@ -3,21 +3,13 @@ import 'package:goalboxd/gamepage.dart';
 import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/requests.dart';
+import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
-class Menu extends StatelessWidget {
+class Menu extends StatefulWidget {
   const Menu({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MenuPage();
-  }
-}
-
-class MenuPage extends StatefulWidget {
-  const MenuPage({super.key});
 
   @override
   State<StatefulWidget> createState() {
@@ -25,7 +17,8 @@ class MenuPage extends StatefulWidget {
   }
 }
 
-class _MyHomePageState extends State<MenuPage> with TickerProviderStateMixin {
+class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
+  late User user;
   late Future<List<dynamic>> _futureGames;
   late Future<List<dynamic>> _futureNowGames;
   late Future<List<dynamic>> _futureTodayGames;

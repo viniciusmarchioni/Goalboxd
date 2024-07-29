@@ -11,8 +11,11 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
   SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (prefs.getString('email') != null) {
-    runApp(const MaterialApp(home: Menu()));
+
+  if (prefs.getInt('id') != null) {
+    runApp(const MaterialApp(
+      home: Menu(),
+    ));
   } else {
     runApp(const MaterialApp(home: MyApp()));
   }
@@ -31,24 +34,14 @@ class MyApp extends StatelessWidget {
       home: const HomeScreen(),
       routes: {
         '/home': (context) => const HomeScreen(),
-        '/menu': (context) => const Menu(),
         '/user': (context) => const UserProfile(),
       },
     );
   }
 }
 
-class HomeScreen extends StatefulWidget {
+class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  @override
-  State<StatefulWidget> createState() => _HomeScreenState();
-}
-
-class _HomeScreenState extends State<HomeScreen> {
-  void changeStr() {
-    Navigator.of(context).pushReplacementNamed('/menu');
-  }
 
   Future<User> login(User user) async {
     User userJson =
@@ -85,7 +78,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               SignInButton(Buttons.google, text: 'Entrar com Google',
                   onPressed: () async {
-                var userGoogle = await _GoogleSignInApi.login();
+                final userGoogle = await _GoogleSignInApi.login();
                 try {
                   User user = await login(User(userGoogle!.displayName!,
                       userGoogle.email, userGoogle.photoUrl, 0));
@@ -99,7 +92,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       user.image ??
                           'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png');
                   await prefs.setInt('id', user.id!);
-                  changeStr();
+                  if (context.mounted) {
+                    Navigator.of(context)
+                        .pushReplacement(MaterialPageRoute(builder: (_) {
+                      return const Menu();
+                    }));
+                  }
                 } catch (e) {
                   debugPrint('Erro: $e');
                 }
