@@ -73,9 +73,18 @@ class _HomeScreenState extends State<HomeScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.spaceAround,
             children: [
-              const Text("LOGO", style: TextStyle(color: Colors.white)),
-              const Text("Goalboxd",
-                  style: TextStyle(color: Colors.white, fontSize: 35)),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  const Text("Goalboxd",
+                      style: TextStyle(color: Colors.white, fontSize: 35)),
+                  Container(
+                    padding: const EdgeInsets.all(2),
+                    height: 60,
+                    child: Image.asset('assets/icon_branco.png'),
+                  )
+                ],
+              ),
               SignInButton(Buttons.google, text: 'Entrar com Google',
                   onPressed: () async {
                 var userGoogle = await _GoogleSignInApi.login();

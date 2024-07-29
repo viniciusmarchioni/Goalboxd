@@ -25,15 +25,16 @@ class MenuPage extends StatefulWidget {
   }
 }
 
-class _MyHomePageState extends State<MenuPage> {
-  int atual = 0;
+class _MyHomePageState extends State<MenuPage> with TickerProviderStateMixin {
   late Future<List<dynamic>> _futureGames;
   late Future<List<dynamic>> _futureNowGames;
   late Future<List<dynamic>> _futureTodayGames;
+  late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
+    _tabController = TabController(length: 3, vsync: this);
     _futureGames = Requests.getRiseGames();
     _futureNowGames = Requests.getNowGames();
     _futureTodayGames = Requests.getTodayGames();
@@ -60,119 +61,119 @@ class _MyHomePageState extends State<MenuPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        flexibleSpace: Container(
-            decoration: const BoxDecoration(
-                gradient: LinearGradient(colors: [Colors.blue, Colors.white]))),
-        title: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text("Goalboxd", style: TextStyle(color: Colors.black)),
-            Container(
-              margin: const EdgeInsets.all(10),
-              child: FutureBuilder(
-                future: image(),
+        appBar: AppBar(
+          flexibleSpace: Container(
+              decoration: const BoxDecoration(
+                  gradient:
+                      LinearGradient(colors: [Colors.blue, Colors.white]))),
+          title: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              const Text("Goalboxd", style: TextStyle(color: Colors.white)),
+              Container(
+                margin: const EdgeInsets.all(10),
+                child: FutureBuilder(
+                  future: image(),
+                  builder: (context, snapshot) {
+                    if (snapshot.connectionState == ConnectionState.done) {
+                      return snapshot.data ?? Container();
+                    } else {
+                      return Container();
+                    }
+                  },
+                ),
+              )
+            ],
+          ),
+          bottom: TabBar(
+            controller: _tabController,
+            tabs: const [
+              Tab(
+                icon: Icon(Icons.fireplace),
+                text: "Em Alta",
+              ),
+              Tab(
+                icon: Icon(Icons.timer),
+                text: "Ao Vivo",
+              ),
+              Tab(
+                icon: Icon(Icons.today),
+                text: "De Hoje",
+              )
+            ],
+            indicatorColor: Colors.blue,
+            labelColor: Colors.white,
+            overlayColor: const MaterialStatePropertyAll(
+                Color.fromARGB(126, 61, 140, 206)),
+          ),
+        ),
+        body: Expanded(
+          child: TabBarView(
+            controller: _tabController,
+            children: [
+              FutureBuilder(
+                future: _futureGames,
                 builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.done) {
-                    return snapshot.data ?? Container();
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
-                    return Container();
+                    return RefreshIndicator(
+                      onRefresh: _refreshGames,
+                      child: ListView(
+                        children: [
+                          for (Games game in snapshot.data ?? [])
+                            _listPlaceHolder(game),
+                        ],
+                      ),
+                    );
                   }
                 },
               ),
-            )
-          ],
-        ),
-      ),
-      body: Column(
-        children: [
-          NavigationBar(
-            backgroundColor: Colors.white,
-            selectedIndex: atual,
-            destinations: const [
-              NavigationDestination(
-                  icon: Icon(Icons.fireplace), label: 'Em alta'),
-              NavigationDestination(icon: Icon(Icons.timer), label: 'Ao vivo'),
-              NavigationDestination(icon: Icon(Icons.today), label: 'De hoje'),
+              FutureBuilder(
+                future: _futureNowGames,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    return RefreshIndicator(
+                      onRefresh: _refreshNowGames,
+                      child: ListView(
+                        children: [
+                          for (Games game in snapshot.data ?? [])
+                            _listPlaceHolder(game),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              ),
+              FutureBuilder(
+                future: _futureTodayGames,
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  } else if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  } else {
+                    return RefreshIndicator(
+                      onRefresh: _refreshTodayGames,
+                      child: ListView(
+                        children: [
+                          for (Games game in snapshot.data ?? [])
+                            _listPlaceHolder(game),
+                        ],
+                      ),
+                    );
+                  }
+                },
+              )
             ],
-            labelBehavior: NavigationDestinationLabelBehavior.onlyShowSelected,
-            onDestinationSelected: (value) {
-              setState(() {
-                atual = value;
-              });
-            },
           ),
-          Expanded(child: _conteudo(atual)),
-        ],
-      ),
-    );
-  }
-
-  Widget _conteudo(int index) {
-    if (index == 0) {
-      return FutureBuilder(
-        future: _futureGames,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return RefreshIndicator(
-              onRefresh: _refreshGames,
-              child: ListView(
-                children: [
-                  for (Games game in snapshot.data ?? [])
-                    _listPlaceHolder(game),
-                ],
-              ),
-            );
-          }
-        },
-      );
-    } else if (index == 1) {
-      return FutureBuilder(
-        future: _futureNowGames,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return RefreshIndicator(
-              onRefresh: _refreshNowGames,
-              child: ListView(
-                children: [
-                  for (Games game in snapshot.data ?? [])
-                    _listPlaceHolder(game),
-                ],
-              ),
-            );
-          }
-        },
-      );
-    } else {
-      return FutureBuilder(
-        future: _futureTodayGames,
-        builder: (context, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          } else if (snapshot.hasError) {
-            return Center(child: Text('Error: ${snapshot.error}'));
-          } else {
-            return RefreshIndicator(
-              onRefresh: _refreshTodayGames,
-              child: ListView(
-                children: [
-                  for (Games game in snapshot.data ?? [])
-                    _listPlaceHolder(game),
-                ],
-              ),
-            );
-          }
-        },
-      );
-    }
+        ));
   }
 
   GestureDetector _listPlaceHolder(Games game) {
