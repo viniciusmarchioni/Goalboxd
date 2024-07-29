@@ -40,6 +40,12 @@ class _MyHomePageState extends State<MenuPage> with TickerProviderStateMixin {
     _futureTodayGames = Requests.getTodayGames();
   }
 
+  @override
+  void dispose() {
+    super.dispose();
+    _tabController.dispose();
+  }
+
   Future<void> _refreshGames() async {
     setState(() {
       _futureGames = Requests.getRiseGames();

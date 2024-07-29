@@ -47,9 +47,7 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   void changeStr() {
-    setState(() {
-      Navigator.of(context).pushReplacementNamed('/menu');
-    });
+    Navigator.of(context).pushReplacementNamed('/menu');
   }
 
   Future<User> login(User user) async {
