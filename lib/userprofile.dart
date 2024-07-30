@@ -12,19 +12,25 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile>
     with TickerProviderStateMixin {
-  final ScrollController _controller = ScrollController();
+  final ScrollController _controllerComment = ScrollController();
+  final ScrollController _controllerReview = ScrollController();
   late final TabController _tabController;
   List<dynamic> comments = [];
+  List<dynamic> reviews = [];
   UserView? user;
   bool endOfComments = false;
-  int page = 0;
+  bool endOfReview = false;
+  int pageComment = 0;
+  int pageReview = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _controller.addListener(_scrollListener);
+    _controllerComment.addListener(_scrollListener);
+    _controllerReview.addListener(_scrollListener2);
     _fetchUserComments();
+    _fetchUserReviews();
     _getUser().then((value) {
       setState(() {
         user = value;
@@ -33,9 +39,18 @@ class _UserProfileState extends State<UserProfile>
   }
 
   void _scrollListener() {
-    if (_controller.position.pixels == _controller.position.maxScrollExtent &&
+    if (_controllerComment.position.pixels ==
+            _controllerComment.position.maxScrollExtent &&
         !endOfComments) {
       _fetchUserComments();
+    }
+  }
+
+  void _scrollListener2() {
+    if (_controllerReview.position.pixels ==
+            _controllerReview.position.maxScrollExtent &&
+        !endOfComments) {
+      _fetchUserReviews();
     }
   }
 
@@ -44,17 +59,31 @@ class _UserProfileState extends State<UserProfile>
     final userId = prefs.getInt('id');
     if (userId == null) return;
 
-    final newComments = await Requests.getProfileComment(userId, page);
+    final newComments = await Requests.getProfileComment(userId, pageComment);
     setState(() {
       comments.addAll(newComments);
       endOfComments = newComments.length < 10;
     });
-    page += 10;
+    pageComment += 10;
+  }
+
+  Future<void> _fetchUserReviews() async {
+    final prefs = await SharedPreferences.getInstance();
+    final userId = prefs.getInt('id');
+    if (userId == null) return;
+
+    final newReview = await Requests.getProfileReview(userId, pageReview);
+    setState(() {
+      reviews.addAll(newReview);
+      endOfReview = newReview.length < 10;
+    });
+    pageReview += 10;
   }
 
   @override
   void dispose() {
-    _controller.dispose();
+    _controllerComment.dispose();
+    _controllerReview.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -125,9 +154,15 @@ class _UserProfileState extends State<UserProfile>
       child: TabBarView(
         controller: _tabController,
         children: [
-          Container(),
           ListView.builder(
-            controller: _controller,
+            controller: _controllerReview,
+            itemCount: reviews.length,
+            itemBuilder: (context, index) {
+              return _buildReviewItem(index);
+            },
+          ),
+          ListView.builder(
+            controller: _controllerComment,
             itemCount: comments.length,
             itemBuilder: (context, index) {
               return _buildCommentItem(index);
@@ -159,6 +194,34 @@ class _UserProfileState extends State<UserProfile>
               Text(user?.username ?? ''),
               Text(comment.comment),
               Text("${comment.game.team1name} x ${comment.game.team2name}"),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildReviewItem(int index) {
+    final review = reviews[index];
+    return Container(
+      margin: const EdgeInsets.only(bottom: 50),
+      child: Row(
+        children: [
+          Container(
+            margin: const EdgeInsets.all(5),
+            child: CircleAvatar(
+              backgroundImage: NetworkImage(
+                user?.urlImage ??
+                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
+              ),
+            ),
+          ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(user?.username ?? ''),
+              Text(review.review.toString()),
+              Text("${review.game.team1name} x ${review.game.team2name}"),
             ],
           ),
         ],

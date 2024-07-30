@@ -55,13 +55,22 @@ class Games {
         type = _toGameType(json['type']);
 }
 
-class ProfileGame {
+class ProfileGameComment {
   late Games game;
   late String comment;
 
-  ProfileGame.fromJson(Map<String, dynamic> json)
+  ProfileGameComment.fromJson(Map<String, dynamic> json)
       : game = Games.forProfile(json),
         comment = json['comment'];
+}
+
+class ProfileGameReview {
+  late Games game;
+  late int review;
+
+  ProfileGameReview.fromJson(Map<String, dynamic> json)
+      : game = Games.forProfile(json),
+        review = json['nota'];
 }
 
 class Complements {

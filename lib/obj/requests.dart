@@ -168,6 +168,11 @@ class Requests {
 
   static Future<List<dynamic>> getProfileComment(int id, int offset) async {
     final jsonResponse = await _fetchData('/users/comment/$id/$offset');
-    return jsonResponse.map((obj) => ProfileGame.fromJson(obj)).toList();
+    return jsonResponse.map((obj) => ProfileGameComment.fromJson(obj)).toList();
+  }
+
+  static Future<List<dynamic>> getProfileReview(int id, int offset) async {
+    final jsonResponse = await _fetchData('/users/review/$id/$offset');
+    return jsonResponse.map((obj) => ProfileGameReview.fromJson(obj)).toList();
   }
 }
