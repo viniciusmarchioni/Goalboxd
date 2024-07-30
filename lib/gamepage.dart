@@ -29,7 +29,14 @@ class _GamePageState extends State<GamePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text("${game.team1name} x ${game.team2name}")),
+      appBar: AppBar(
+        title: Text("${game.team1name} x ${game.team2name}"),
+        flexibleSpace: Container(
+          decoration: const BoxDecoration(
+            gradient: LinearGradient(colors: [Colors.blue, Colors.white]),
+          ),
+        ),
+      ),
       body:
           Column(mainAxisAlignment: MainAxisAlignment.spaceBetween, children: [
         Flexible(
