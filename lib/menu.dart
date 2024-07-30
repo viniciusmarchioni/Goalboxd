@@ -237,6 +237,10 @@ BoxBorder _borderDefine(String championship) {
     ]));
   } else if (championship == 'Serie B') {
     return Border.all(color: Colors.green);
+  } else if (championship == 'Copa Do Brasil') {
+    return const GradientBoxBorder(
+        gradient:
+            LinearGradient(colors: [Colors.yellowAccent, Colors.blueAccent]));
   }
   return Border.all(color: Colors.red);
 }
