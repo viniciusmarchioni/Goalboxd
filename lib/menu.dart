@@ -72,7 +72,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.all(10),
                 child: FutureBuilder(
-                  future: image(),
+                  future: UserImage(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       return snapshot.data ?? Container();
@@ -114,11 +114,15 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 future: _futureGames,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    ));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
                     return RefreshIndicator(
+                      color: Colors.blue,
                       onRefresh: _refreshGames,
                       child: ListView(
                         children: [
@@ -134,11 +138,15 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 future: _futureNowGames,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    ));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
                     return RefreshIndicator(
+                      color: Colors.blue,
                       onRefresh: _refreshNowGames,
                       child: ListView(
                         children: [
@@ -154,11 +162,15 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 future: _futureTodayGames,
                 builder: (context, snapshot) {
                   if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
+                    return const Center(
+                        child: CircularProgressIndicator(
+                      color: Colors.blue,
+                    ));
                   } else if (snapshot.hasError) {
                     return Center(child: Text('Error: ${snapshot.error}'));
                   } else {
                     return RefreshIndicator(
+                      color: Colors.blue,
                       onRefresh: _refreshTodayGames,
                       child: ListView(
                         children: [
@@ -239,13 +251,15 @@ BoxBorder _borderDefine(String championship) {
     return Border.all(color: Colors.green);
   } else if (championship == 'Copa Do Brasil') {
     return const GradientBoxBorder(
-        gradient:
-            LinearGradient(colors: [Colors.yellowAccent, Colors.blueAccent]));
+        gradient: SweepGradient(colors: [
+      Colors.green,
+      Color.fromARGB(255, 192, 176, 35),
+    ]));
   }
   return Border.all(color: Colors.red);
 }
 
-Future<Widget?> image() async {
+Future<Widget?> UserImage() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.getString('image') != null) {
     return Container(
