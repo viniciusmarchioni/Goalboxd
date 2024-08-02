@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
 import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
-import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
@@ -19,18 +18,18 @@ class Menu extends StatefulWidget {
 
 class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
   late User user;
-  late Future<List<dynamic>> _futureGames;
-  late Future<List<dynamic>> _futureNowGames;
-  late Future<List<dynamic>> _futureTodayGames;
+  late Future<List<Games>> _futureGames;
+  late Future<List<Games>> _futureNowGames;
+  late Future<List<Games>> _futureTodayGames;
   late final TabController _tabController;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _futureGames = Requests.getRiseGames();
-    _futureNowGames = Requests.getNowGames();
-    _futureTodayGames = Requests.getTodayGames();
+    _futureGames = Games.getRiseGames();
+    _futureNowGames = Games.getNowGames();
+    _futureTodayGames = Games.getTodayGames();
   }
 
   @override
@@ -41,19 +40,19 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
 
   Future<void> _refreshGames() async {
     setState(() {
-      _futureGames = Requests.getRiseGames();
+      _futureGames = Games.getRiseGames();
     });
   }
 
   Future<void> _refreshNowGames() async {
     setState(() {
-      _futureNowGames = Requests.getNowGames();
+      _futureNowGames = Games.getNowGames();
     });
   }
 
   Future<void> _refreshTodayGames() async {
     setState(() {
-      _futureTodayGames = Requests.getTodayGames();
+      _futureTodayGames = Games.getTodayGames();
     });
   }
 
@@ -119,7 +118,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                       color: Colors.blue,
                     ));
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return const Center(child: Text('Falha de conexão'));
                   } else {
                     return RefreshIndicator(
                       color: Colors.blue,
@@ -143,7 +142,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                       color: Colors.blue,
                     ));
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return const Center(child: Text('Falha de conexão'));
                   } else {
                     return RefreshIndicator(
                       color: Colors.blue,
@@ -167,7 +166,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                       color: Colors.blue,
                     ));
                   } else if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
+                    return const Center(child: Text('Falha de conexão'));
                   } else {
                     return RefreshIndicator(
                       color: Colors.blue,

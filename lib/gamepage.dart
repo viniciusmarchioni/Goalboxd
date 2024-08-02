@@ -257,14 +257,14 @@ class _CommentWidgetState extends State<_CommentWidget> {
 
   Future<void> _refreshComments() async {
     setState(() {
-      _futurecomments = Requests.getComments(game.id);
+      _futurecomments = Comments.getComments(game.id);
     });
   }
 
   @override
   void initState() {
     game = widget.game;
-    _futurecomments = Requests.getComments(game.id);
+    _futurecomments = Comments.getComments(game.id);
     super.initState();
   }
 
@@ -322,7 +322,7 @@ class _CommentWidgetState extends State<_CommentWidget> {
                   ElevatedButton(
                       onPressed: () async {
                         if (controller.text.isNotEmpty) {
-                          await Requests.postComment(
+                          await Comments.postComment(
                               game.id, controller.text.toString());
                           controller.clear();
                           _refreshComments();

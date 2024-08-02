@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:goalboxd/obj/comments.dart';
+import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 
@@ -62,7 +64,8 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   }
 
   Future<void> _fetchUserComments() async {
-    final newComments = await Requests.getProfileComment(userid, pageComment);
+    final newComments =
+        await ProfileGameComment.getProfileComment(userid, pageComment);
     setState(() {
       comments.addAll(newComments);
       endOfComments = newComments.length < 10;
@@ -71,7 +74,8 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   }
 
   Future<void> _fetchUserReviews() async {
-    final newReview = await Requests.getProfileReview(userid, pageReview);
+    final newReview =
+        await ProfileGameReview.getProfileReview(userid, pageReview);
     setState(() {
       reviews.addAll(newReview);
       endOfReview = newReview.length < 10;

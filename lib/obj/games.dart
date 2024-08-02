@@ -1,3 +1,7 @@
+import 'dart:convert';
+import 'package:flutter/material.dart';
+import 'package:http/http.dart' as http;
+
 class Games {
   late GameType type;
   late String team1name;
@@ -53,15 +57,57 @@ class Games {
         championship = json['championship'],
         rate = 0,
         type = _toGameType(json['type']);
-}
 
-class ProfileGameComment {
-  late Games game;
-  late String comment;
+  static Future<List<Games>> getRiseGames() async {
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2:5000/games/rise'))
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      List<Games> games = [];
+      for (var i in jsonDecode(response.body)) {
+        games.add(Games.fromJson(i));
+      }
 
-  ProfileGameComment.fromJson(Map<String, dynamic> json)
-      : game = Games.forProfile(json),
-        comment = json['comment'];
+      debugPrint(games.toString());
+      return games;
+    } else {
+      return [];
+    }
+  }
+
+  static Future<List<Games>> getNowGames() async {
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2:5000/games/now'))
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      List<Games> games = [];
+      for (var i in jsonDecode(response.body)) {
+        games.add(Games.fromJson(i));
+      }
+
+      debugPrint(games.toString());
+      return games;
+    } else {
+      return [];
+    }
+  }
+
+  static Future<List<Games>> getTodayGames() async {
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2:5000/games/today'))
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      List<Games> games = [];
+      for (var i in jsonDecode(response.body)) {
+        games.add(Games.fromJson(i));
+      }
+
+      debugPrint(games.toString());
+      return games;
+    } else {
+      return [];
+    }
+  }
 }
 
 class ProfileGameReview {
@@ -71,6 +117,23 @@ class ProfileGameReview {
   ProfileGameReview.fromJson(Map<String, dynamic> json)
       : game = Games.forProfile(json),
         review = json['nota'];
+
+  static Future<List<ProfileGameReview>> getProfileReview(
+      int id, int offset) async {
+    final response = await http
+        .get(Uri.parse('http://10.0.2.2:5000/users/review/$id/$offset'))
+        .timeout(const Duration(seconds: 5));
+    if (response.statusCode == 200) {
+      List<ProfileGameReview> profileGameReview = [];
+      for (var i in jsonDecode(response.body)) {
+        profileGameReview.add(ProfileGameReview.fromJson(i));
+      }
+      debugPrint(profileGameReview.toString());
+      return profileGameReview;
+    } else {
+      return [];
+    }
+  }
 }
 
 class Complements {

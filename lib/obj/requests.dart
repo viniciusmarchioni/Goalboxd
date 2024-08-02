@@ -1,8 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
-import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:http/http.dart' as http;
@@ -10,45 +8,6 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class Requests {
   static const String _baseUrl = 'http://10.0.2.2:5000';
-
-  static Future<List<dynamic>> _fetchData(String endpoint) async {
-    try {
-      final response = await http
-          .get(Uri.parse('$_baseUrl/$endpoint'))
-          .timeout(const Duration(seconds: 3));
-      if (response.statusCode == 200) {
-        return json.decode(response.body) as List<dynamic>;
-      } else {
-        throw Exception('Failed to load objects');
-      }
-    } on TimeoutException {
-      debugPrint('----------------TIMEOUT------------');
-      return [];
-    } on HttpException {
-      debugPrint('----------------Failed to connect to API------------');
-      return [];
-    }
-  }
-
-  static Future<List<dynamic>> getRiseGames() async {
-    final jsonResponse = await _fetchData('/games/rise');
-    return jsonResponse.map((obj) => Games.fromJson(obj)).toList();
-  }
-
-  static Future<List<dynamic>> getTodayGames() async {
-    final jsonResponse = await _fetchData('/games/today');
-    return jsonResponse.map((obj) => Games.fromJson(obj)).toList();
-  }
-
-  static Future<List<dynamic>> getNowGames() async {
-    final jsonResponse = await _fetchData('/games/now');
-    return jsonResponse.map((obj) => Games.fromJson(obj)).toList();
-  }
-
-  static Future<List<dynamic>> getComments(int id) async {
-    final jsonResponse = await _fetchData('/games/comments/$id');
-    return jsonResponse.map((obj) => Comments.fromJson(obj)).toList();
-  }
 
   static Future<bool> postReview(int grade, int gameid) async {
     try {
@@ -72,33 +31,6 @@ class Requests {
     } on TimeoutException {
       debugPrint('----------------TIMEOUT------------');
       throw 'Timeout';
-    }
-  }
-
-  static Future<bool> postComment(int gameid, String comment) async {
-    try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
-      final response = await http.post(
-        Uri.parse('$_baseUrl/games/comments'),
-        body: jsonEncode({
-          'gameid': gameid,
-          'comment': comment,
-          'userid': prefs.getInt('id')
-        }),
-        headers: {
-          "Accept": "application/json",
-          "content-type": "application/json"
-        },
-      ).timeout(const Duration(seconds: 5));
-
-      if (response.statusCode == 200) {
-        return true;
-      } else {
-        return false;
-      }
-    } on TimeoutException {
-      debugPrint('----------------TIMEOUT------------');
-      return false;
     }
   }
 
@@ -164,15 +96,5 @@ class Requests {
     } else {
       throw 'Erro em buscar perfil';
     }
-  }
-
-  static Future<List<dynamic>> getProfileComment(int id, int offset) async {
-    final jsonResponse = await _fetchData('/users/comment/$id/$offset');
-    return jsonResponse.map((obj) => ProfileGameComment.fromJson(obj)).toList();
-  }
-
-  static Future<List<dynamic>> getProfileReview(int id, int offset) async {
-    final jsonResponse = await _fetchData('/users/review/$id/$offset');
-    return jsonResponse.map((obj) => ProfileGameReview.fromJson(obj)).toList();
   }
 }
