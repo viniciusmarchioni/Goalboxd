@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
-import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -16,22 +15,17 @@ class _UserProfileState extends State<UserProfile>
   final ScrollController _controllerComment = ScrollController();
   final ScrollController _controllerReview = ScrollController();
   late final TabController _tabController;
-  List<dynamic> comments = [];
-  List<dynamic> reviews = [];
+  RepositoryProfileGame repositoryProfileGame = RepositoryProfileGame();
   UserView? user;
-  bool endOfComments = false;
-  bool endOfReview = false;
-  int pageComment = 0;
-  int pageReview = 0;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _controllerComment.addListener(_scrollListener);
-    _controllerReview.addListener(_scrollListener2);
-    _fetchUserComments();
-    _fetchUserReviews();
+    _controllerComment.addListener(_scrollComments);
+    _controllerReview.addListener(_scrollReviews);
+    repositoryProfileGame.setProfileComment();
+    repositoryProfileGame.setProfileReview();
     _getUser().then((value) {
       setState(() {
         user = value;
@@ -39,48 +33,24 @@ class _UserProfileState extends State<UserProfile>
     });
   }
 
-  void _scrollListener() {
+  void _scrollComments() {
     if (_controllerComment.position.pixels ==
             _controllerComment.position.maxScrollExtent &&
-        !endOfComments) {
-      _fetchUserComments();
+        !repositoryProfileGame.endComments) {
+      setState(() {
+        repositoryProfileGame.setProfileComment();
+      });
     }
   }
 
-  void _scrollListener2() {
+  void _scrollReviews() {
     if (_controllerReview.position.pixels ==
             _controllerReview.position.maxScrollExtent &&
-        !endOfComments) {
-      _fetchUserReviews();
+        !repositoryProfileGame.endReview) {
+      setState(() {
+        repositoryProfileGame.setProfileReview();
+      });
     }
-  }
-
-  Future<void> _fetchUserComments() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('id');
-    if (userId == null) return;
-
-    final newComments =
-        await ProfileGameComment.getProfileComment(userId, pageComment);
-    setState(() {
-      comments.addAll(newComments);
-      endOfComments = newComments.length < 10;
-    });
-    pageComment += 10;
-  }
-
-  Future<void> _fetchUserReviews() async {
-    final prefs = await SharedPreferences.getInstance();
-    final userId = prefs.getInt('id');
-    if (userId == null) return;
-
-    final newReview =
-        await ProfileGameReview.getProfileReview(userId, pageReview);
-    setState(() {
-      reviews.addAll(newReview);
-      endOfReview = newReview.length < 10;
-    });
-    pageReview += 10;
   }
 
   @override
@@ -159,14 +129,14 @@ class _UserProfileState extends State<UserProfile>
         children: [
           ListView.builder(
             controller: _controllerReview,
-            itemCount: reviews.length,
+            itemCount: repositoryProfileGame.reviews.length,
             itemBuilder: (context, index) {
               return _buildReviewItem(index);
             },
           ),
           ListView.builder(
             controller: _controllerComment,
-            itemCount: comments.length,
+            itemCount: repositoryProfileGame.comments.length,
             itemBuilder: (context, index) {
               return _buildCommentItem(index);
             },
@@ -177,7 +147,7 @@ class _UserProfileState extends State<UserProfile>
   }
 
   Widget _buildCommentItem(int index) {
-    final comment = comments[index];
+    final comment = repositoryProfileGame.comments[index];
     return Container(
       margin: const EdgeInsets.only(bottom: 50),
       child: Row(
@@ -205,7 +175,7 @@ class _UserProfileState extends State<UserProfile>
   }
 
   Widget _buildReviewItem(int index) {
-    final review = reviews[index];
+    final review = repositoryProfileGame.reviews[index];
     return Container(
       margin: const EdgeInsets.only(bottom: 50),
       child: Row(

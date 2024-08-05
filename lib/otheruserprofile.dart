@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
-import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 
 class OtherUserProfile extends StatefulWidget {
@@ -15,19 +14,13 @@ class OtherUserProfile extends StatefulWidget {
 
 class _OtherUserProfileState extends State<OtherUserProfile>
     with TickerProviderStateMixin {
-  int atual = 0;
   late String username;
   late int userid;
+  RepositoryProfileGame repositoryProfileGame = RepositoryProfileGame();
   final ScrollController _controllerComment = ScrollController();
   final ScrollController _controllerReview = ScrollController();
   late final TabController _tabController;
-  List<dynamic> comments = [];
-  List<dynamic> reviews = [];
   UserView? user;
-  bool endOfComments = false;
-  bool endOfReview = false;
-  int pageComment = 0;
-  int pageReview = 0;
 
   @override
   void initState() {
@@ -36,9 +29,9 @@ class _OtherUserProfileState extends State<OtherUserProfile>
     _controllerReview.addListener(_scrollListener2);
     userid = widget.userid;
     username = widget.username;
+    repositoryProfileGame.setProfileComment();
+    repositoryProfileGame.setProfileReview();
     super.initState();
-    _fetchUserComments();
-    _fetchUserReviews();
     _getUser(userid).then((value) {
       setState(() {
         user = value;
@@ -48,38 +41,18 @@ class _OtherUserProfileState extends State<OtherUserProfile>
 
   void _scrollListener() {
     if (_controllerComment.position.pixels ==
-            _controllerComment.position.maxScrollExtent &&
-        !endOfComments) {
-      _fetchUserComments();
+        _controllerComment.position.maxScrollExtent) {
+      setState(() {
+        repositoryProfileGame.setProfileComment();
+      });
     }
   }
 
   void _scrollListener2() {
     if (_controllerReview.position.pixels ==
-            _controllerReview.position.maxScrollExtent &&
-        !endOfComments) {
-      _fetchUserReviews();
+        _controllerReview.position.maxScrollExtent) {
+      repositoryProfileGame.setProfileReview();
     }
-  }
-
-  Future<void> _fetchUserComments() async {
-    final newComments =
-        await ProfileGameComment.getProfileComment(userid, pageComment);
-    setState(() {
-      comments.addAll(newComments);
-      endOfComments = newComments.length < 10;
-    });
-    pageComment += 10;
-  }
-
-  Future<void> _fetchUserReviews() async {
-    final newReview =
-        await ProfileGameReview.getProfileReview(userid, pageReview);
-    setState(() {
-      reviews.addAll(newReview);
-      endOfReview = newReview.length < 10;
-    });
-    pageReview += 10;
   }
 
   @override
@@ -146,14 +119,14 @@ class _OtherUserProfileState extends State<OtherUserProfile>
         children: [
           ListView.builder(
             controller: _controllerReview,
-            itemCount: reviews.length,
+            itemCount: repositoryProfileGame.reviews.length,
             itemBuilder: (context, index) {
               return _buildReviewItem(index);
             },
           ),
           ListView.builder(
             controller: _controllerComment,
-            itemCount: comments.length,
+            itemCount: repositoryProfileGame.comments.length,
             itemBuilder: (context, index) {
               return _buildCommentItem(index);
             },
@@ -164,7 +137,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   }
 
   Widget _buildCommentItem(int index) {
-    final comment = comments[index];
+    final comment = repositoryProfileGame.comments[index];
     return Container(
       margin: const EdgeInsets.only(bottom: 50),
       child: Row(
@@ -192,7 +165,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   }
 
   Widget _buildReviewItem(int index) {
-    final review = reviews[index];
+    final review = repositoryProfileGame.reviews[index];
     return Container(
       margin: const EdgeInsets.only(bottom: 50),
       child: Row(

@@ -25,17 +25,16 @@ class Comments {
         username: json['name'],
         urlImage: json['image']);
   }
-  static Future<List<Comments>> getComments(int id) async {
+  static Future<List<Comments>> getComments(int id, int page) async {
     try {
       final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/games/comments/$id'))
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/comments/$id/$page'))
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         List<Comments> comments = [];
         for (var i in jsonDecode(response.body)) {
           comments.add(Comments.fromJson(i));
         }
-        debugPrint(comments.toString());
         return comments;
       } else {
         return [];
@@ -82,25 +81,77 @@ class ProfileGameComment {
   ProfileGameComment.fromJson(Map<String, dynamic> json)
       : game = Games.forProfile(json),
         comment = json['comment'];
+}
 
-  static Future<List<ProfileGameComment>> getProfileComment(
-      int id, int offset) async {
+class ProfileGameReview {
+  late Games game;
+  late int review;
+
+  ProfileGameReview.fromJson(Map<String, dynamic> json)
+      : game = Games.forProfile(json),
+        review = json['nota'];
+}
+
+class RepositoryProfileGame {
+  List<ProfileGameComment> comments = [];
+  List<ProfileGameReview> reviews = [];
+  int _pageComments = 0;
+  int _pageReviews = 0;
+  bool endComments = false;
+  bool endReview = false;
+
+  Future<void> setProfileComment() async {
     try {
-      final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/users/comment/$id/$offset'))
-          .timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        List<ProfileGameComment> profileGameComment = [];
-        for (var i in jsonDecode(response.body)) {
-          profileGameComment.add(ProfileGameComment.fromJson(i));
+      if (!endComments) {
+        final prefs = await SharedPreferences.getInstance();
+        final userId = prefs.getInt('id');
+
+        final response = await http
+            .get(Uri.parse(
+                '${dotenv.env['API_URL']}/users/comment/$userId/$_pageComments'))
+            .timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) {
+          List<ProfileGameComment> profileGameComment = [];
+          for (var i in jsonDecode(response.body)) {
+            profileGameComment.add(ProfileGameComment.fromJson(i));
+          }
+          _pageComments += 10;
+          comments.addAll(profileGameComment);
+          endComments = profileGameComment.length < 10;
+        } else {
+          throw ("Erro");
         }
-        debugPrint(profileGameComment.toString());
-        return profileGameComment;
-      } else {
-        return [];
       }
     } catch (e) {
-      return [];
+      throw ("Erro");
     }
   }
+
+  Future<void> setProfileReview() async {
+    if (!endReview) {
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final userId = prefs.getInt('id');
+        final response = await http
+            .get(Uri.parse(
+                '${dotenv.env['API_URL']}/users/review/$userId/$_pageReviews'))
+            .timeout(const Duration(seconds: 5));
+        if (response.statusCode == 200) {
+          List<ProfileGameReview> profileGameReview = [];
+          for (var i in jsonDecode(response.body)) {
+            profileGameReview.add(ProfileGameReview.fromJson(i));
+          }
+          endReview = profileGameReview.length < 10;
+          _pageReviews += 10;
+          reviews.addAll(profileGameReview);
+        } else {
+          return;
+        }
+      } catch (e) {
+        return;
+      }
+    }
+  }
+
+  RepositoryProfileGame();
 }

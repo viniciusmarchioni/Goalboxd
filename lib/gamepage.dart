@@ -252,19 +252,35 @@ class _CommentWidget extends StatefulWidget {
 class _CommentWidgetState extends State<_CommentWidget> {
   late Games game;
   final controller = TextEditingController();
-  late Future<List<dynamic>> _futurecomments;
+  List<Comments> comments = [];
+  int commentPage = 0;
+  bool endOfComments = false;
+  final ScrollController _controllerComment = ScrollController();
 
   Future<void> _refreshComments() async {
+    List<Comments> newComments =
+        await Comments.getComments(game.id, commentPage);
     setState(() {
-      _futurecomments = Comments.getComments(game.id);
+      comments.addAll(newComments);
+      endOfComments = newComments.length < 10;
+      commentPage += 10;
     });
   }
 
   @override
   void initState() {
+    _controllerComment.addListener(_scrollListener);
     game = widget.game;
-    _futurecomments = Comments.getComments(game.id);
+    _refreshComments();
     super.initState();
+  }
+
+  void _scrollListener() {
+    if (_controllerComment.position.pixels ==
+            _controllerComment.position.maxScrollExtent &&
+        !endOfComments) {
+      _refreshComments();
+    }
   }
 
   @override
@@ -279,33 +295,24 @@ class _CommentWidgetState extends State<_CommentWidget> {
               color: Color.fromARGB(115, 12, 11, 10)),
           height: 400,
           child: Column(
+            mainAxisAlignment: MainAxisAlignment.spaceAround,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const Text("Comentarios:",
                   style: TextStyle(fontSize: 25, color: Colors.white)),
-              FutureBuilder(
-                future: _futurecomments,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const CircularProgressIndicator();
-                  } else {
-                    return SizedBox(
-                      height: 275,
-                      width: MediaQuery.of(context).size.width,
-                      child: RefreshIndicator(
-                        onRefresh: _refreshComments,
-                        child: ListView(
-                          children: [
-                            for (Comments comment in snapshot.data ?? [])
-                              _ComentarioPlaceholder(comment: comment)
-                          ],
-                        ),
-                      ),
-                    );
-                  }
-                },
+              SizedBox(
+                height: 250,
+                width: MediaQuery.of(context).size.width,
+                child: ListView.builder(
+                  controller: _controllerComment,
+                  itemCount: comments.length,
+                  itemBuilder: (context, index) {
+                    return _ComentarioPlaceholder(comment: comments[index]);
+                  },
+                ),
               ),
               Row(
+                mainAxisAlignment: MainAxisAlignment.spaceAround,
                 children: [
                   Container(
                       margin: const EdgeInsets.only(bottom: 10),
@@ -314,20 +321,28 @@ class _CommentWidgetState extends State<_CommentWidget> {
                       child: TextField(
                         controller: controller,
                         maxLines: 10,
+                        cursorColor: Colors.blue,
                         decoration: const InputDecoration(
+                            fillColor: Colors.white,
+                            focusedBorder: OutlineInputBorder(
+                              borderSide: BorderSide(color: Colors.blue),
+                            ),
                             border: OutlineInputBorder(),
                             hintText: "Comentario"),
                       )),
                   ElevatedButton(
-                      onPressed: () async {
-                        if (controller.text.isNotEmpty) {
-                          await Comments.postComment(
-                              game.id, controller.text.toString());
-                          controller.clear();
-                          _refreshComments();
-                        }
-                      },
-                      child: const Text("Enviar"))
+                    style: const ButtonStyle(
+                        foregroundColor: MaterialStatePropertyAll(Colors.blue)),
+                    onPressed: () async {
+                      if (controller.text.isNotEmpty) {
+                        await Comments.postComment(
+                            game.id, controller.text.toString());
+                        controller.clear();
+                        _refreshComments();
+                      }
+                    },
+                    child: const Text("Enviar"),
+                  )
                 ],
               )
             ],

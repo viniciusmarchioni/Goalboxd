@@ -53,13 +53,7 @@ class Games {
         team1name = json['team1'],
         team2name = json['team2'],
         team1score = json['score1'],
-        team2score = json['score2'],
-        country1 = json['country1'],
-        country2 = json['country2'],
-        date = DateTime.parse(json['date']),
-        championship = json['championship'],
-        rate = 0,
-        type = _toGameType(json['type']);
+        team2score = json['score2'];
 
   static Future<List<Games>> getRiseGames() async {
     try {
@@ -170,34 +164,30 @@ class Games {
   }
 }
 
-class ProfileGameReview {
-  late Games game;
-  late int review;
+class GamesRepository {
+  List<Games> games = [];
 
-  ProfileGameReview.fromJson(Map<String, dynamic> json)
-      : game = Games.forProfile(json),
-        review = json['nota'];
-
-  static Future<List<ProfileGameReview>> getProfileReview(
-      int id, int offset) async {
+  Future<void> init(String endpoint) async {
     try {
       final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/users/review/$id/$offset'))
+          .get(Uri.parse('${dotenv.env['API_URL']}$endpoint'))
           .timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
-        List<ProfileGameReview> profileGameReview = [];
+        games = [];
         for (var i in jsonDecode(response.body)) {
-          profileGameReview.add(ProfileGameReview.fromJson(i));
+          games.add(Games.fromJson(i));
         }
-        debugPrint(profileGameReview.toString());
-        return profileGameReview;
       } else {
-        return [];
+        debugPrint("Erro");
+        games = [];
       }
     } catch (e) {
-      return [];
+      debugPrint("Erro");
+      games = [];
     }
   }
+
+  GamesRepository();
 }
 
 class Complements {

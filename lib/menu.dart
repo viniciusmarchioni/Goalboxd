@@ -71,7 +71,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.all(10),
                 child: FutureBuilder(
-                  future: UserImage(),
+                  future: userImage(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       return snapshot.data ?? Container();
@@ -258,12 +258,13 @@ BoxBorder _borderDefine(String championship) {
   return Border.all(color: Colors.red);
 }
 
-Future<Widget?> UserImage() async {
+Future<Widget?> userImage() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   if (prefs.getString('image') != null) {
     return Container(
       margin: const EdgeInsets.all(10),
       child: PopupMenuButton(
+        tooltip: 'Mostrar opções',
         icon: CircleAvatar(
           backgroundImage: NetworkImage(prefs.getString('image')!),
           maxRadius: 20,
