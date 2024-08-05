@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:goalboxd/obj/Requests.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/otheruserprofile.dart';
@@ -49,7 +48,7 @@ class _GamePageState extends State<GamePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FutureBuilder(
-                      future: Requests.getTeam(game.team1name),
+                      future: Complements.getTeam(game.team1name),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -93,7 +92,7 @@ class _GamePageState extends State<GamePage> {
                       ],
                     ),
                     FutureBuilder(
-                      future: Requests.getTeam(game.team2name),
+                      future: Complements.getTeam(game.team2name),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
