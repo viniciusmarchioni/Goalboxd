@@ -1,6 +1,9 @@
+import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Games {
   late GameType type;
@@ -59,53 +62,110 @@ class Games {
         type = _toGameType(json['type']);
 
   static Future<List<Games>> getRiseGames() async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/games/rise'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<Games> games = [];
-      for (var i in jsonDecode(response.body)) {
-        games.add(Games.fromJson(i));
-      }
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/rise'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<Games> games = [];
+        for (var i in jsonDecode(response.body)) {
+          games.add(Games.fromJson(i));
+        }
 
-      debugPrint(games.toString());
-      return games;
-    } else {
+        debugPrint(games.toString());
+        return games;
+      } else {
+        return [];
+      }
+    } catch (e) {
       return [];
     }
   }
 
   static Future<List<Games>> getNowGames() async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/games/now'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<Games> games = [];
-      for (var i in jsonDecode(response.body)) {
-        games.add(Games.fromJson(i));
-      }
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/now'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<Games> games = [];
+        for (var i in jsonDecode(response.body)) {
+          games.add(Games.fromJson(i));
+        }
 
-      debugPrint(games.toString());
-      return games;
-    } else {
+        debugPrint(games.toString());
+        return games;
+      } else {
+        return [];
+      }
+    } on TimeoutException {
+      return [];
+    } catch (e) {
       return [];
     }
   }
 
   static Future<List<Games>> getTodayGames() async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/games/today'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<Games> games = [];
-      for (var i in jsonDecode(response.body)) {
-        games.add(Games.fromJson(i));
-      }
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/today'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<Games> games = [];
+        for (var i in jsonDecode(response.body)) {
+          games.add(Games.fromJson(i));
+        }
 
-      debugPrint(games.toString());
-      return games;
-    } else {
+        debugPrint(games.toString());
+        return games;
+      } else {
+        return [];
+      }
+    } catch (e) {
       return [];
+    }
+  }
+
+  static Future<bool> postReview(int grade, int gameid) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final response = await http.post(
+        Uri.parse('${dotenv.env['API_URL']}/games/review'),
+        body: jsonEncode(
+            {'userid': prefs.getInt('id'), 'gameid': gameid, 'grade': grade}),
+        headers: {
+          "Accept": "application/json",
+          "content-type": "application/json"
+        },
+      ).timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        debugPrint('----------------ERRO------------');
+        return false;
+      }
+    } on TimeoutException {
+      debugPrint('----------------TIMEOUT------------');
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
+
+  static Future<int> getReview(int gameid) async {
+    try {
+      SharedPreferences prefs = await SharedPreferences.getInstance();
+      final response = await http.get(Uri.parse(
+          '${dotenv.env['API_URL']}/games/review/$gameid/${prefs.getInt('id')}'));
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return data['grade'];
+      } else {
+        return 0;
+      }
+    } catch (e) {
+      return 0;
     }
   }
 }
@@ -120,17 +180,21 @@ class ProfileGameReview {
 
   static Future<List<ProfileGameReview>> getProfileReview(
       int id, int offset) async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/users/review/$id/$offset'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<ProfileGameReview> profileGameReview = [];
-      for (var i in jsonDecode(response.body)) {
-        profileGameReview.add(ProfileGameReview.fromJson(i));
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/users/review/$id/$offset'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<ProfileGameReview> profileGameReview = [];
+        for (var i in jsonDecode(response.body)) {
+          profileGameReview.add(ProfileGameReview.fromJson(i));
+        }
+        debugPrint(profileGameReview.toString());
+        return profileGameReview;
+      } else {
+        return [];
       }
-      debugPrint(profileGameReview.toString());
-      return profileGameReview;
-    } else {
+    } catch (e) {
       return [];
     }
   }
@@ -145,6 +209,22 @@ class Complements {
   Complements.fromJson(Map<String, dynamic> json)
       : colorTeam = json['color'],
         urlImage = json['url_image'];
+
+  static Future<Complements> getTeam(String name) async {
+    try {
+      final response =
+          await http.get(Uri.parse('${dotenv.env['API_URL']}/teams/$name'));
+
+      if (response.statusCode == 200) {
+        final Map<String, dynamic> data = json.decode(response.body);
+        return Complements.fromJson(data);
+      } else {
+        return Complements(null, null);
+      }
+    } catch (e) {
+      return Complements(null, null);
+    }
+  }
 }
 
 GameType _toGameType(String type) {

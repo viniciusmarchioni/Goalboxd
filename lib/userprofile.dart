@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
-import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -238,5 +237,5 @@ Future<UserView> _getUser() async {
   final prefs = await SharedPreferences.getInstance();
   final userId = prefs.getInt('id');
   if (userId == null) throw Exception("User ID not found in SharedPreferences");
-  return await Requests.getProfile(userId);
+  return await UserView.getProfile(userId);
 }

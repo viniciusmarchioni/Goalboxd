@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/games.dart';
-import 'package:goalboxd/obj/requests.dart';
 
 class Review extends StatefulWidget {
   final int? phate;
@@ -29,7 +28,7 @@ class _ReviewState extends State<Review> {
   }
 
   Future<void> _loadGrade() async {
-    final grade = await Requests.getReview(game.id);
+    final grade = await Games.getReview(game.id);
     setState(() {
       hate = grade;
     });
@@ -46,7 +45,7 @@ class _ReviewState extends State<Review> {
                 ? const Icon(Icons.star)
                 : const Icon(Icons.star_border),
             onTap: () async {
-              await Requests.postReview(count, game.id);
+              await Games.postReview(count, game.id);
               setState(() {
                 hate = count;
               });

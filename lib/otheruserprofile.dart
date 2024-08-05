@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
-import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 
 class OtherUserProfile extends StatefulWidget {
@@ -225,7 +224,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
 
 Future<UserView> _getUser(int userid) async {
   try {
-    UserView user = await Requests.getProfile(userid);
+    UserView user = await UserView.getProfile(userid);
     return user;
   } catch (e) {
     return UserView('Perfil Inexistente', null, 0, 0);

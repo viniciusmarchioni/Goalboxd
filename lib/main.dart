@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/menu.dart';
-import 'package:goalboxd/obj/requests.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:google_sign_in/google_sign_in.dart';
@@ -9,7 +9,7 @@ import 'package:sign_in_button/sign_in_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+  await dotenv.load(fileName: ".env");
   SharedPreferences prefs = await SharedPreferences.getInstance();
 
   if (prefs.getInt('id') != null) {
@@ -43,7 +43,7 @@ class HomeScreen extends StatelessWidget {
 
   Future<User> login(User user) async {
     User userJson =
-        await Requests.login(User(user.name, user.email, user.image, user.id));
+        await User.login(User(user.name, user.email, user.image, user.id));
     return userJson;
   }
 

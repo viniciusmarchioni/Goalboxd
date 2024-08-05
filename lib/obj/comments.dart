@@ -4,6 +4,7 @@ import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 class Comments {
   String? urlImage;
@@ -25,17 +26,21 @@ class Comments {
         urlImage: json['image']);
   }
   static Future<List<Comments>> getComments(int id) async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/games/comments/$id'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<Comments> comments = [];
-      for (var i in jsonDecode(response.body)) {
-        comments.add(Comments.fromJson(i));
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/comments/$id'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<Comments> comments = [];
+        for (var i in jsonDecode(response.body)) {
+          comments.add(Comments.fromJson(i));
+        }
+        debugPrint(comments.toString());
+        return comments;
+      } else {
+        return [];
       }
-      debugPrint(comments.toString());
-      return comments;
-    } else {
+    } catch (e) {
       return [];
     }
   }
@@ -44,7 +49,7 @@ class Comments {
     try {
       SharedPreferences prefs = await SharedPreferences.getInstance();
       final response = await http.post(
-        Uri.parse('http://10.0.2.2:5000/games/comments'),
+        Uri.parse('${dotenv.env['API_URL']}/games/comments'),
         body: jsonEncode({
           'gameid': gameid,
           'comment': comment,
@@ -64,6 +69,8 @@ class Comments {
     } on TimeoutException {
       debugPrint('----------------TIMEOUT------------');
       return false;
+    } catch (e) {
+      return false;
     }
   }
 }
@@ -78,17 +85,21 @@ class ProfileGameComment {
 
   static Future<List<ProfileGameComment>> getProfileComment(
       int id, int offset) async {
-    final response = await http
-        .get(Uri.parse('http://10.0.2.2:5000/users/comment/$id/$offset'))
-        .timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      List<ProfileGameComment> profileGameComment = [];
-      for (var i in jsonDecode(response.body)) {
-        profileGameComment.add(ProfileGameComment.fromJson(i));
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/users/comment/$id/$offset'))
+          .timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        List<ProfileGameComment> profileGameComment = [];
+        for (var i in jsonDecode(response.body)) {
+          profileGameComment.add(ProfileGameComment.fromJson(i));
+        }
+        debugPrint(profileGameComment.toString());
+        return profileGameComment;
+      } else {
+        return [];
       }
-      debugPrint(profileGameComment.toString());
-      return profileGameComment;
-    } else {
+    } catch (e) {
       return [];
     }
   }
