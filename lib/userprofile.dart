@@ -22,10 +22,10 @@ class _UserProfileState extends State<UserProfile>
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _controllerComment.addListener(_scrollComments);
-    _controllerReview.addListener(_scrollReviews);
-    repositoryProfileGame.setProfileComment();
-    repositoryProfileGame.setProfileReview();
+    _controllerComment.addListener(_scrollComment);
+    _controllerReview.addListener(_scrollListener2);
+    repositoryProfileGame.setProfileComment(null);
+    repositoryProfileGame.setProfileReview(null);
     _getUser().then((value) {
       setState(() {
         user = value;
@@ -33,22 +33,20 @@ class _UserProfileState extends State<UserProfile>
     });
   }
 
-  void _scrollComments() {
+  void _scrollComment() {
     if (_controllerComment.position.pixels ==
-            _controllerComment.position.maxScrollExtent &&
-        !repositoryProfileGame.endComments) {
+        _controllerComment.position.maxScrollExtent) {
       setState(() {
-        repositoryProfileGame.setProfileComment();
+        repositoryProfileGame.setProfileComment(null);
       });
     }
   }
 
-  void _scrollReviews() {
+  void _scrollListener2() {
     if (_controllerReview.position.pixels ==
-            _controllerReview.position.maxScrollExtent &&
-        !repositoryProfileGame.endReview) {
+        _controllerReview.position.maxScrollExtent) {
       setState(() {
-        repositoryProfileGame.setProfileReview();
+        repositoryProfileGame.setProfileReview(null);
       });
     }
   }

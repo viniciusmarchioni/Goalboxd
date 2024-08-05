@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
 import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
-import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -17,7 +16,6 @@ class Menu extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
-  late User user;
   late Future<List<Games>> _futureGames;
   late Future<List<Games>> _futureNowGames;
   late Future<List<Games>> _futureTodayGames;

@@ -100,12 +100,13 @@ class RepositoryProfileGame {
   bool endComments = false;
   bool endReview = false;
 
-  Future<void> setProfileComment() async {
+  Future<void> setProfileComment(int? userId) async {
     try {
       if (!endComments) {
-        final prefs = await SharedPreferences.getInstance();
-        final userId = prefs.getInt('id');
-
+        if (userId == null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          userId = prefs.getInt('id');
+        }
         final response = await http
             .get(Uri.parse(
                 '${dotenv.env['API_URL']}/users/comment/$userId/$_pageComments'))
@@ -127,11 +128,13 @@ class RepositoryProfileGame {
     }
   }
 
-  Future<void> setProfileReview() async {
+  Future<void> setProfileReview(int? userId) async {
     if (!endReview) {
       try {
-        final prefs = await SharedPreferences.getInstance();
-        final userId = prefs.getInt('id');
+        if (userId == null) {
+          SharedPreferences prefs = await SharedPreferences.getInstance();
+          userId = prefs.getInt('id');
+        }
         final response = await http
             .get(Uri.parse(
                 '${dotenv.env['API_URL']}/users/review/$userId/$_pageReviews'))

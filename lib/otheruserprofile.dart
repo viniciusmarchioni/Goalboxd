@@ -29,8 +29,8 @@ class _OtherUserProfileState extends State<OtherUserProfile>
     _controllerReview.addListener(_scrollListener2);
     userid = widget.userid;
     username = widget.username;
-    repositoryProfileGame.setProfileComment();
-    repositoryProfileGame.setProfileReview();
+    repositoryProfileGame.setProfileComment(widget.userid);
+    repositoryProfileGame.setProfileReview(widget.userid);
     super.initState();
     _getUser(userid).then((value) {
       setState(() {
@@ -43,7 +43,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
     if (_controllerComment.position.pixels ==
         _controllerComment.position.maxScrollExtent) {
       setState(() {
-        repositoryProfileGame.setProfileComment();
+        repositoryProfileGame.setProfileComment(widget.userid);
       });
     }
   }
@@ -51,7 +51,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   void _scrollListener2() {
     if (_controllerReview.position.pixels ==
         _controllerReview.position.maxScrollExtent) {
-      repositoryProfileGame.setProfileReview();
+      repositoryProfileGame.setProfileReview(widget.userid);
     }
   }
 
