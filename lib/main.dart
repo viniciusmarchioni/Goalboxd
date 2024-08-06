@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/menu.dart';
 import 'package:goalboxd/obj/user.dart';
+import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -33,6 +34,7 @@ class MyApp extends StatelessWidget {
       routes: {
         '/home': (context) => const HomeScreen(),
         '/user': (context) => const UserProfile(),
+        '/settings': (context) => const Settings()
       },
     );
   }

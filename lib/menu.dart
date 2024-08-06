@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
 import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
+import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -276,8 +277,13 @@ Future<Widget?> userImage() async {
               }));
             },
           ),
-          const PopupMenuItem(
-            child: Text('Configurações'),
+          PopupMenuItem(
+            onTap: () {
+              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                return const Settings();
+              }));
+            },
+            child: const Text('Configurações'),
           ),
           PopupMenuItem(
             onTap: () {

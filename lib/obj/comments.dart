@@ -120,11 +120,11 @@ class RepositoryProfileGame {
           comments.addAll(profileGameComment);
           endComments = profileGameComment.length < 10;
         } else {
-          throw ("Erro");
+          return;
         }
       }
     } catch (e) {
-      throw ("Erro");
+      return;
     }
   }
 
