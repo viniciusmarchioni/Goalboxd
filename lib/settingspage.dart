@@ -38,15 +38,24 @@ class SettingsState extends State {
               future: _getSettings(0),
               builder: (context, snapshot) {
                 song = snapshot.data ?? true;
-                return Switch(
-                  activeColor: Colors.blue,
-                  value: song,
-                  onChanged: (value) async {
-                    await _setSettings(value, 0);
-                    setState(() {
-                      song = value;
-                    });
-                  },
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.music_note,
+                      color: Colors.blue,
+                    ),
+                    Switch(
+                      activeColor: Colors.blue,
+                      value: song,
+                      onChanged: (value) async {
+                        await _setSettings(value, 0);
+                        setState(() {
+                          song = value;
+                        });
+                      },
+                    ),
+                  ],
                 );
               },
             ),
@@ -54,15 +63,24 @@ class SettingsState extends State {
               future: _getSettings(1),
               builder: (context, snapshot) {
                 vibration = snapshot.data ?? true;
-                return Switch(
-                  activeColor: Colors.blue,
-                  value: vibration,
-                  onChanged: (value) async {
-                    await _setSettings(value, 1);
-                    setState(() {
-                      vibration = value;
-                    });
-                  },
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.vibration,
+                      color: Colors.blue,
+                    ),
+                    Switch(
+                      activeColor: Colors.blue,
+                      value: vibration,
+                      onChanged: (value) async {
+                        await _setSettings(value, 1);
+                        setState(() {
+                          vibration = value;
+                        });
+                      },
+                    ),
+                  ],
                 );
               },
             ),
@@ -70,15 +88,24 @@ class SettingsState extends State {
               future: _getSettings(2),
               builder: (context, snapshot) {
                 notification = snapshot.data ?? true;
-                return Switch(
-                  activeColor: Colors.blue,
-                  value: notification,
-                  onChanged: (value) async {
-                    await _setSettings(value, 2);
-                    setState(() {
-                      notification = value;
-                    });
-                  },
+                return Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(
+                      Icons.notifications,
+                      color: Colors.blue,
+                    ),
+                    Switch(
+                      activeColor: Colors.blue,
+                      value: notification,
+                      onChanged: (value) async {
+                        await _setSettings(value, 2);
+                        setState(() {
+                          notification = value;
+                        });
+                      },
+                    ),
+                  ],
                 );
               },
             ),
