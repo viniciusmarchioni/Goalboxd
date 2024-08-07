@@ -83,11 +83,8 @@ class _GamePageState extends State<GamePage> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         _marqueeOrNot(game.team1name),
-                        Container(
-                          margin: const EdgeInsets.only(left: 10, right: 10),
-                          child: Text(game.scorebord(),
-                              style: const TextStyle(fontSize: 20)),
-                        ),
+                        Text(game.scorebord(),
+                            style: const TextStyle(fontSize: 20)),
                         _marqueeOrNot(game.team2name)
                       ],
                     ),
@@ -142,7 +139,7 @@ class _GamePageState extends State<GamePage> {
 }
 
 Widget _marqueeOrNot(String team) {
-  if (team.length > 9) {
+  if (team.length > 5) {
     return Container(
       width: 80,
       height: 50,
@@ -184,15 +181,6 @@ Color _teamcolor(String? color) {
   }
 }
 
-/*
-
-CircleAvatar(
-                radius: 20,
-                backgroundImage: NetworkImage(comment.urlImage ??
-                    'https://pbs.twimg.com/media/GGxpGBKXAAAkdwf?format=jpg&name=small'))
-
-
- */
 class _ComentarioPlaceholder extends StatelessWidget {
   final Comments comment;
   const _ComentarioPlaceholder({

@@ -65,8 +65,6 @@ class Games {
         for (var i in jsonDecode(response.body)) {
           games.add(Games.fromJson(i));
         }
-
-        debugPrint(games.toString());
         return games;
       } else {
         return [];
@@ -86,8 +84,6 @@ class Games {
         for (var i in jsonDecode(response.body)) {
           games.add(Games.fromJson(i));
         }
-
-        debugPrint(games.toString());
         return games;
       } else {
         return [];
@@ -109,8 +105,6 @@ class Games {
         for (var i in jsonDecode(response.body)) {
           games.add(Games.fromJson(i));
         }
-
-        debugPrint(games.toString());
         return games;
       } else {
         return [];

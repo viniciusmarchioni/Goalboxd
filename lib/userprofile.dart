@@ -191,7 +191,9 @@ class _UserProfileState extends State<UserProfile>
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(user?.username ?? ''),
-              Text(review.review.toString()),
+              Row(children: [
+                for (int i = 0; i < review.review; i++) const Icon(Icons.star)
+              ]),
               Text("${review.game.team1name} x ${review.game.team2name}"),
             ],
           ),

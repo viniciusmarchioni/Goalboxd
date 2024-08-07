@@ -5,6 +5,7 @@ import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
+import 'package:marquee/marquee.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Menu extends StatefulWidget {
@@ -104,84 +105,82 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 Color.fromARGB(126, 61, 140, 206)),
           ),
         ),
-        body: Expanded(
-          child: TabBarView(
-            controller: _tabController,
-            children: [
-              FutureBuilder(
-                future: _futureGames,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator(
-                      color: Colors.blue,
-                    ));
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Falha de conexão'));
-                  } else {
-                    return RefreshIndicator(
-                      color: Colors.blue,
-                      onRefresh: _refreshGames,
-                      child: ListView(
-                        children: [
-                          for (Games game in snapshot.data ?? [])
-                            _listPlaceHolder(game),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-              FutureBuilder(
-                future: _futureNowGames,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator(
-                      color: Colors.blue,
-                    ));
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Falha de conexão'));
-                  } else {
-                    return RefreshIndicator(
-                      color: Colors.blue,
-                      onRefresh: _refreshNowGames,
-                      child: ListView(
-                        children: [
-                          for (Games game in snapshot.data ?? [])
-                            _listPlaceHolder(game),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              ),
-              FutureBuilder(
-                future: _futureTodayGames,
-                builder: (context, snapshot) {
-                  if (snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(
-                        child: CircularProgressIndicator(
-                      color: Colors.blue,
-                    ));
-                  } else if (snapshot.hasError) {
-                    return const Center(child: Text('Falha de conexão'));
-                  } else {
-                    return RefreshIndicator(
-                      color: Colors.blue,
-                      onRefresh: _refreshTodayGames,
-                      child: ListView(
-                        children: [
-                          for (Games game in snapshot.data ?? [])
-                            _listPlaceHolder(game),
-                        ],
-                      ),
-                    );
-                  }
-                },
-              )
-            ],
-          ),
+        body: TabBarView(
+          controller: _tabController,
+          children: [
+            FutureBuilder(
+              future: _futureGames,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ));
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Falha de conexão'));
+                } else {
+                  return RefreshIndicator(
+                    color: Colors.blue,
+                    onRefresh: _refreshGames,
+                    child: ListView(
+                      children: [
+                        for (Games game in snapshot.data ?? [])
+                          _listPlaceHolder(game),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
+            FutureBuilder(
+              future: _futureNowGames,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ));
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Falha de conexão'));
+                } else {
+                  return RefreshIndicator(
+                    color: Colors.blue,
+                    onRefresh: _refreshNowGames,
+                    child: ListView(
+                      children: [
+                        for (Games game in snapshot.data ?? [])
+                          _listPlaceHolder(game),
+                      ],
+                    ),
+                  );
+                }
+              },
+            ),
+            FutureBuilder(
+              future: _futureTodayGames,
+              builder: (context, snapshot) {
+                if (snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.blue,
+                  ));
+                } else if (snapshot.hasError) {
+                  return const Center(child: Text('Falha de conexão'));
+                } else {
+                  return RefreshIndicator(
+                    color: Colors.blue,
+                    onRefresh: _refreshTodayGames,
+                    child: ListView(
+                      children: [
+                        for (Games game in snapshot.data ?? [])
+                          _listPlaceHolder(game),
+                      ],
+                    ),
+                  );
+                }
+              },
+            )
+          ],
         ));
   }
 
@@ -207,7 +206,9 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
             game.type == GameType.football
                 ? const Icon(Icons.sports_soccer)
                 : const Icon(Icons.sports_basketball_outlined),
-            Text("${game.team1name} ${game.scorebord()} ${game.team2name}"),
+            _marqueeOrNot(game.team1name),
+            Text(game.scorebord()),
+            _marqueeOrNot(game.team2name),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
@@ -226,6 +227,26 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
       ),
     );
   }
+}
+
+Widget _marqueeOrNot(String team) {
+  if (team.length > 9) {
+    return SizedBox(
+      width: 80,
+      height: 50,
+      child: Marquee(
+        text: team,
+        style: const TextStyle(fontSize: 20),
+        blankSpace: 5.0,
+        pauseAfterRound: const Duration(seconds: 1),
+      ),
+    );
+  }
+  return Text(
+    team,
+    style: const TextStyle(fontSize: 20),
+    overflow: TextOverflow.ellipsis,
+  );
 }
 
 BoxBorder _borderDefine(String championship) {
