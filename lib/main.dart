@@ -10,15 +10,22 @@ import 'package:sign_in_button/sign_in_button.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
-  await dotenv.load(fileName: ".env");
   SharedPreferences prefs = await SharedPreferences.getInstance();
+  await dotenv.load(fileName: ".env");
 
   if (prefs.getInt('id') != null) {
-    runApp(const MaterialApp(
-      home: Menu(),
+    runApp(MaterialApp(
+      home: const Menu(),
+      theme: ThemeData(useMaterial3: true),
+      title: 'Goalboxd',
+      routes: {
+        '/home': (context) => const HomeScreen(),
+        '/user': (context) => const UserProfile(),
+        '/settings': (context) => const Settings()
+      },
     ));
   } else {
-    runApp(const MaterialApp(home: MyApp()));
+    runApp(const MyApp());
   }
 }
 
@@ -42,12 +49,6 @@ class MyApp extends StatelessWidget {
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
-
-  Future<User> login(User user) async {
-    User userJson =
-        await User.login(User(user.name, user.email, user.image, user.id));
-    return userJson;
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -78,20 +79,11 @@ class HomeScreen extends StatelessWidget {
               ),
               SignInButton(Buttons.google, text: 'Entrar com Google',
                   onPressed: () async {
-                final userGoogle = await _GoogleSignInApi.login();
                 try {
-                  User user = await login(User(userGoogle!.displayName!,
-                      userGoogle.email, userGoogle.photoUrl, 0));
-
-                  final SharedPreferences prefs =
-                      await SharedPreferences.getInstance();
-                  await prefs.setString('email', user.email);
-                  await prefs.setString('username', user.name);
-                  await prefs.setString(
-                      'image',
-                      user.image ??
-                          'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png');
-                  await prefs.setInt('id', user.id!);
+                  final userGoogle = await _GoogleSignInApi.login();
+                  User2 user2 = User2.toLogin(userGoogle!.displayName!,
+                      userGoogle.email, userGoogle.photoUrl);
+                  await user2.login();
                   if (context.mounted) {
                     Navigator.of(context)
                         .pushReplacement(MaterialPageRoute(builder: (_) {
@@ -99,7 +91,7 @@ class HomeScreen extends StatelessWidget {
                     }));
                   }
                 } catch (e) {
-                  debugPrint('Erro: $e');
+                  debugPrint('Erro MAIN: $e');
                 }
               }),
               Container(),
