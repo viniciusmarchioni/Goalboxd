@@ -81,14 +81,11 @@ class HomeScreen extends StatelessWidget {
                   onPressed: () async {
                 try {
                   final userGoogle = await _GoogleSignInApi.login();
-                  User2 user2 = User2.toLogin(userGoogle!.displayName!,
+                  User user = User.toLogin(userGoogle!.displayName!,
                       userGoogle.email, userGoogle.photoUrl);
-                  await user2.login();
+                  await user.login();
                   if (context.mounted) {
-                    Navigator.of(context)
-                        .pushReplacement(MaterialPageRoute(builder: (_) {
-                      return const Menu();
-                    }));
+                    Navigator.of(context).pushReplacementNamed('/home');
                   }
                 } catch (e) {
                   debugPrint('Erro MAIN: $e');

@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
 import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
+import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
@@ -12,9 +13,7 @@ class Menu extends StatefulWidget {
   const Menu({super.key});
 
   @override
-  State<StatefulWidget> createState() {
-    return _MyHomePageState();
-  }
+  State<StatefulWidget> createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
@@ -71,7 +70,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
               Container(
                 margin: const EdgeInsets.all(10),
                 child: FutureBuilder(
-                  future: userImage(),
+                  future: _userImage(),
                   builder: (context, snapshot) {
                     if (snapshot.connectionState == ConnectionState.done) {
                       return snapshot.data ?? Container();
@@ -227,123 +226,126 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
       ),
     );
   }
-}
 
-Widget _marqueeOrNot(String team) {
-  if (team.length > 9) {
-    return SizedBox(
-      width: 80,
-      height: 50,
-      child: Marquee(
-        text: team,
-        style: const TextStyle(fontSize: 20),
-        blankSpace: 5.0,
-        pauseAfterRound: const Duration(seconds: 1),
-      ),
+  Widget _marqueeOrNot(String team) {
+    if (team.length > 9) {
+      return SizedBox(
+        width: 80,
+        height: 50,
+        child: Marquee(
+          text: team,
+          style: const TextStyle(fontSize: 20),
+          blankSpace: 5.0,
+          pauseAfterRound: const Duration(seconds: 1),
+        ),
+      );
+    }
+    return Text(
+      team,
+      style: const TextStyle(fontSize: 20),
+      overflow: TextOverflow.ellipsis,
     );
   }
-  return Text(
-    team,
-    style: const TextStyle(fontSize: 20),
-    overflow: TextOverflow.ellipsis,
-  );
-}
 
-BoxBorder _borderDefine(String championship) {
-  if (championship == 'Serie A') {
-    return Border.all(color: Colors.blue);
-  } else if (championship == 'Libertadores') {
-    return const GradientBoxBorder(
-        gradient: SweepGradient(colors: [
-      Color.fromARGB(255, 218, 218, 52),
-      Colors.black,
-    ]));
-  } else if (championship == 'Euro Championship') {
-    return const GradientBoxBorder(
-        gradient: LinearGradient(colors: [
-      Colors.redAccent,
-      Colors.greenAccent,
-      Colors.yellowAccent,
-      Colors.blueAccent
-    ]));
-  } else if (championship == 'Serie B') {
-    return Border.all(color: Colors.green);
-  } else if (championship == 'Copa Do Brasil') {
-    return const GradientBoxBorder(
-        gradient: SweepGradient(colors: [
-      Colors.green,
-      Color.fromARGB(255, 192, 176, 35),
-    ]));
+  BoxBorder _borderDefine(String championship) {
+    if (championship == 'Serie A') {
+      return Border.all(color: Colors.blue);
+    } else if (championship == 'Libertadores') {
+      return const GradientBoxBorder(
+          gradient: SweepGradient(colors: [
+        Color.fromARGB(255, 218, 218, 52),
+        Colors.black,
+      ]));
+    } else if (championship == 'Euro Championship') {
+      return const GradientBoxBorder(
+          gradient: LinearGradient(colors: [
+        Colors.redAccent,
+        Colors.greenAccent,
+        Colors.yellowAccent,
+        Colors.blueAccent
+      ]));
+    } else if (championship == 'Serie B') {
+      return Border.all(color: Colors.green);
+    } else if (championship == 'Copa Do Brasil') {
+      return const GradientBoxBorder(
+          gradient: SweepGradient(
+              colors: [Colors.blue, Colors.green, Colors.yellow]));
+    }
+    return Border.all(color: Colors.black);
   }
-  return Border.all(color: Colors.red);
-}
 
-Future<Widget?> userImage() async {
-  SharedPreferences prefs = await SharedPreferences.getInstance();
-  if (prefs.getString('image') != null) {
+  Future<Widget?> _userImage() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    if (prefs.getString('image') != null) {
+      return Container(
+        margin: const EdgeInsets.all(10),
+        child: PopupMenuButton(
+          tooltip: 'Mostrar opções',
+          icon: CircleAvatar(
+            backgroundImage: NetworkImage(prefs.getString('image')!),
+            maxRadius: 20,
+          ),
+          itemBuilder: (context) => [
+            PopupMenuItem(
+              child: const Text('Perfil'),
+              onTap: () async {
+                User user = User();
+                SharedPreferences prefs = await SharedPreferences.getInstance();
+                await user.getProfile(prefs.getInt('id')!);
+                if (context.mounted) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return const UserProfile();
+                  }));
+                }
+              },
+            ),
+            PopupMenuItem(
+              onTap: () {
+                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                  return const Settings();
+                }));
+              },
+              child: const Text('Configurações'),
+            ),
+            PopupMenuItem(
+              onTap: () {
+                prefs.clear();
+                Navigator.of(context)
+                    .pushReplacement(MaterialPageRoute(builder: (_) {
+                  return const MyApp();
+                }));
+              },
+              child: const Text('Sair'),
+            ),
+          ],
+        ),
+      );
+    }
     return Container(
       margin: const EdgeInsets.all(10),
-      child: PopupMenuButton(
-        tooltip: 'Mostrar opções',
-        icon: CircleAvatar(
-          backgroundImage: NetworkImage(prefs.getString('image')!),
-          maxRadius: 20,
-        ),
-        itemBuilder: (context) => [
-          PopupMenuItem(
-            child: const Text('Perfil'),
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return const UserProfile();
-              }));
-            },
-          ),
-          PopupMenuItem(
-            onTap: () {
-              Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                return const Settings();
-              }));
-            },
-            child: const Text('Configurações'),
-          ),
-          PopupMenuItem(
-            onTap: () {
-              prefs.clear();
-              Navigator.of(context)
-                  .pushReplacement(MaterialPageRoute(builder: (_) {
-                return const MyApp();
-              }));
-            },
-            child: const Text('Sair'),
-          ),
-        ],
-      ),
+      child: IconButton(
+          iconSize: 20,
+          icon: const CircleAvatar(
+              backgroundImage: AssetImage('yuri.jpg'), maxRadius: 20),
+          onPressed: () => PopupMenuButton(
+                itemBuilder: (context) => [
+                  const PopupMenuItem(
+                    onTap: null,
+                    child: Text('Perfil'),
+                  ),
+                  const PopupMenuItem(
+                    onTap: null,
+                    child: Text('Configurações'),
+                  ),
+                  PopupMenuItem(
+                    onTap: () {
+                      prefs.clear();
+                      Navigator.of(context).pushReplacementNamed('/home');
+                    },
+                    child: const Text('Sair'),
+                  ),
+                ],
+              )),
     );
   }
-  return Container(
-    margin: const EdgeInsets.all(10),
-    child: IconButton(
-        iconSize: 20,
-        icon: const CircleAvatar(
-            backgroundImage: AssetImage('yuri.jpg'), maxRadius: 20),
-        onPressed: () => PopupMenuButton(
-              itemBuilder: (context) => [
-                const PopupMenuItem(
-                  onTap: null,
-                  child: Text('Perfil'),
-                ),
-                const PopupMenuItem(
-                  onTap: null,
-                  child: Text('Configurações'),
-                ),
-                PopupMenuItem(
-                  onTap: () {
-                    prefs.clear();
-                    Navigator.of(context).pushReplacementNamed('/home');
-                  },
-                  child: const Text('Sair'),
-                ),
-              ],
-            )),
-  );
 }

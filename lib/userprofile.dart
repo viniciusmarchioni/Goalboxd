@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/user.dart';
-import 'package:shared_preferences/shared_preferences.dart';
 
 class UserProfile extends StatefulWidget {
   const UserProfile({super.key});
@@ -12,49 +11,25 @@ class UserProfile extends StatefulWidget {
 
 class _UserProfileState extends State<UserProfile>
     with TickerProviderStateMixin {
-  final ScrollController _controllerComment = ScrollController();
-  final ScrollController _controllerReview = ScrollController();
   late final TabController _tabController;
   RepositoryProfileGame repositoryProfileGame = RepositoryProfileGame();
-  UserView? user;
+  User? user;
+
+  /*
+  Isso não está feito da melhor maneira, 
+  não pode atualizar o estado com hot reload mas é oq funciona,
+  futuramente atualizar com provider ou algo do tipo
+  */
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 2, vsync: this);
-    _controllerComment.addListener(_scrollComment);
-    _controllerReview.addListener(_scrollListener2);
-    repositoryProfileGame.setProfileComment(null);
-    repositoryProfileGame.setProfileReview(null);
-    _getUser().then((value) {
-      setState(() {
-        user = value;
-      });
-    });
-  }
-
-  void _scrollComment() {
-    if (_controllerComment.position.pixels ==
-        _controllerComment.position.maxScrollExtent) {
-      setState(() {
-        repositoryProfileGame.setProfileComment(null);
-      });
-    }
-  }
-
-  void _scrollListener2() {
-    if (_controllerReview.position.pixels ==
-        _controllerReview.position.maxScrollExtent) {
-      setState(() {
-        repositoryProfileGame.setProfileReview(null);
-      });
-    }
+    user = User();
   }
 
   @override
   void dispose() {
-    _controllerComment.dispose();
-    _controllerReview.dispose();
     _tabController.dispose();
     super.dispose();
   }
@@ -62,24 +37,35 @@ class _UserProfileState extends State<UserProfile>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Perfil'),
-        flexibleSpace: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(colors: [Colors.blue, Colors.white]),
+        appBar: AppBar(
+          title: const Text('Perfil'),
+          flexibleSpace: Container(
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(colors: [Colors.blue, Colors.white]),
+            ),
           ),
         ),
-      ),
-      body: user == null
-          ? const Center(child: CircularProgressIndicator())
-          : Column(
-              children: [
-                _buildUserInfo(),
-                _buildTabBar(),
-                _buildTabBarView(),
-              ],
-            ),
-    );
+        body: FutureBuilder(
+          future: user?.getProfile(null),
+          builder: (context, snapshot) {
+            if (snapshot.connectionState == ConnectionState.done) {
+              return Column(
+                children: [
+                  _buildUserInfo(),
+                  _buildTabBar(),
+                  TabView(tabController: _tabController, user: user!),
+                ],
+              );
+            } else if (snapshot.hasError) {
+              return Text(snapshot.error.toString());
+            }
+            return const Center(
+              child: CircularProgressIndicator(
+                color: Colors.blue,
+              ),
+            );
+          },
+        ));
   }
 
   Widget _buildUserInfo() {
@@ -92,7 +78,7 @@ class _UserProfileState extends State<UserProfile>
           CircleAvatar(
             maxRadius: 50,
             backgroundImage: NetworkImage(
-              user?.urlImage ??
+              user?.urlimage ??
                   'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
             ),
           ),
@@ -119,28 +105,91 @@ class _UserProfileState extends State<UserProfile>
           const MaterialStatePropertyAll(Color.fromARGB(126, 61, 140, 206)),
     );
   }
+}
 
-  Widget _buildTabBarView() {
-    return Expanded(
-      child: TabBarView(
-        controller: _tabController,
-        children: [
-          ListView.builder(
-            controller: _controllerReview,
-            itemCount: repositoryProfileGame.reviews.length,
-            itemBuilder: (context, index) {
-              return _buildReviewItem(index);
-            },
+class TabView extends StatefulWidget {
+  final TabController tabController;
+  final User user;
+
+  const TabView({super.key, required this.tabController, required this.user});
+
+  @override
+  State<StatefulWidget> createState() => TabViewState();
+}
+
+class TabViewState extends State<TabView> {
+  late final TabController tabController;
+  RepositoryProfileGame repositoryProfileGame = RepositoryProfileGame();
+  final ScrollController _controllerComment = ScrollController();
+  final ScrollController _controllerReview = ScrollController();
+  late User user;
+
+  void _scrollComment() {
+    if (_controllerComment.position.pixels ==
+        _controllerComment.position.maxScrollExtent) {
+      setState(() {
+        repositoryProfileGame.setProfileComment(null);
+      });
+    }
+  }
+
+  void _scrollListener2() {
+    if (_controllerReview.position.pixels ==
+        _controllerReview.position.maxScrollExtent) {
+      setState(() {
+        repositoryProfileGame.setProfileReview(null);
+      });
+    }
+  }
+
+  @override
+  void dispose() {
+    _controllerComment.dispose();
+    _controllerReview.dispose();
+    super.dispose();
+  }
+
+  @override
+  void initState() {
+    super.initState();
+    user = widget.user;
+    _controllerComment.addListener(_scrollComment);
+    _controllerReview.addListener(_scrollListener2);
+    tabController = widget.tabController;
+  }
+
+  Future<void> chama2() async {
+    await repositoryProfileGame.setProfileComment(null);
+    await repositoryProfileGame.setProfileReview(null);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder(
+      future: chama2(),
+      builder: (context, snapshot) {
+        return Expanded(
+          child: TabBarView(
+            controller: tabController,
+            children: [
+              ListView.builder(
+                controller: _controllerReview,
+                itemCount: repositoryProfileGame.reviews.length,
+                itemBuilder: (context, index) {
+                  return _buildReviewItem(index);
+                },
+              ),
+              ListView.builder(
+                controller: _controllerComment,
+                itemCount: repositoryProfileGame.comments.length,
+                itemBuilder: (context, index) {
+                  return _buildCommentItem(index);
+                },
+              ),
+            ],
           ),
-          ListView.builder(
-            controller: _controllerComment,
-            itemCount: repositoryProfileGame.comments.length,
-            itemBuilder: (context, index) {
-              return _buildCommentItem(index);
-            },
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -154,7 +203,7 @@ class _UserProfileState extends State<UserProfile>
             margin: const EdgeInsets.all(5),
             child: CircleAvatar(
               backgroundImage: NetworkImage(
-                user?.urlImage ??
+                user.urlimage ??
                     'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
               ),
             ),
@@ -162,7 +211,7 @@ class _UserProfileState extends State<UserProfile>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(user?.username ?? ''),
+              Text(user.username),
               Text(comment.comment),
               Text("${comment.game.team1name} x ${comment.game.team2name}"),
             ],
@@ -182,7 +231,7 @@ class _UserProfileState extends State<UserProfile>
             margin: const EdgeInsets.all(5),
             child: CircleAvatar(
               backgroundImage: NetworkImage(
-                user?.urlImage ??
+                user.urlimage ??
                     'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
               ),
             ),
@@ -190,7 +239,7 @@ class _UserProfileState extends State<UserProfile>
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Text(user?.username ?? ''),
+              Text(user.username),
               Row(children: [
                 for (int i = 0; i < review.review; i++) const Icon(Icons.star)
               ]),
@@ -201,11 +250,4 @@ class _UserProfileState extends State<UserProfile>
       ),
     );
   }
-}
-
-Future<UserView> _getUser() async {
-  final prefs = await SharedPreferences.getInstance();
-  final userId = prefs.getInt('id');
-  if (userId == null) throw Exception("User ID not found in SharedPreferences");
-  return await UserView.getProfile(userId);
 }
