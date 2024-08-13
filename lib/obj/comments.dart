@@ -75,24 +75,24 @@ class Comments {
 }
 
 class ProfileGameComment {
-  late Games game;
+  late Games2 game;
   late String comment;
 
   ProfileGameComment.fromJson(Map<String, dynamic> json)
-      : game = Games.forProfile(json),
+      : game = Games2.fromJsonProfile(json),
         comment = json['comment'];
 }
 
 class ProfileGameReview {
-  late Games game;
+  late Games2 game;
   late int review;
 
   ProfileGameReview.fromJson(Map<String, dynamic> json)
-      : game = Games.forProfile(json),
+      : game = Games2.fromJsonProfile(json),
         review = json['nota'];
 }
 
-class RepositoryProfileGame {
+class RepositoryProfileGame extends ChangeNotifier {
   List<ProfileGameComment> comments = [];
   List<ProfileGameReview> reviews = [];
   int _pageComments = 0;
@@ -119,11 +119,13 @@ class RepositoryProfileGame {
           _pageComments += 10;
           comments.addAll(profileGameComment);
           endComments = profileGameComment.length < 10;
+          notifyListeners();
         } else {
           return;
         }
       }
     } catch (e) {
+      endComments = true;
       return;
     }
   }
@@ -147,10 +149,12 @@ class RepositoryProfileGame {
           endReview = profileGameReview.length < 10;
           _pageReviews += 10;
           reviews.addAll(profileGameReview);
+          notifyListeners();
         } else {
           return;
         }
       } catch (e) {
+        endReview = true;
         return;
       }
     }

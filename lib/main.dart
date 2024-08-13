@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/menu.dart';
+import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:google_sign_in/google_sign_in.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:sign_in_button/sign_in_button.dart';
 
@@ -14,7 +16,33 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   if (prefs.getInt('id') != null) {
-    runApp(MaterialApp(
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => GamesRepository(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => GamesRepository(),
+        )
+      ],
+      child: MaterialApp(
+        home: const Menu(),
+        theme: ThemeData(useMaterial3: true),
+        title: 'Goalboxd',
+        routes: {
+          '/home': (context) => const HomeScreen(),
+          '/user': (context) => const UserProfile(),
+          '/settings': (context) => const Settings()
+        },
+      ),
+    ));
+  } else {
+    runApp(const MyApp());
+  }
+}
+
+/*
+MaterialApp(
       home: const Menu(),
       theme: ThemeData(useMaterial3: true),
       title: 'Goalboxd',
@@ -23,12 +51,9 @@ void main() async {
         '/user': (context) => const UserProfile(),
         '/settings': (context) => const Settings()
       },
-    ));
-  } else {
-    runApp(const MyApp());
-  }
-}
+    )
 
+ */
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -39,7 +64,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(useMaterial3: true),
       home: const HomeScreen(),
       routes: {
-        '/home': (context) => const HomeScreen(),
+        '/home': (context) => const Menu(),
         '/user': (context) => const UserProfile(),
         '/settings': (context) => const Settings()
       },

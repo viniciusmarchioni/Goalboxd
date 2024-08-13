@@ -158,32 +158,6 @@ class Games {
   }
 }
 
-class GamesRepository {
-  List<Games> games = [];
-
-  Future<void> init(String endpoint) async {
-    try {
-      final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}$endpoint'))
-          .timeout(const Duration(seconds: 5));
-      if (response.statusCode == 200) {
-        games = [];
-        for (var i in jsonDecode(response.body)) {
-          games.add(Games.fromJson(i));
-        }
-      } else {
-        debugPrint("Erro");
-        games = [];
-      }
-    } catch (e) {
-      debugPrint("Erro");
-      games = [];
-    }
-  }
-
-  GamesRepository();
-}
-
 class Complements {
   late String? urlImage;
   late String? colorTeam;
@@ -219,3 +193,121 @@ GameType _toGameType(String type) {
 }
 
 enum GameType { football, basquete }
+
+class Games2 {
+  GameType? type;
+  String? team1name;
+  String? team2name;
+  int? team1score;
+  int? team2score;
+  int? id;
+  String? country1;
+  String? country2;
+  DateTime? date;
+  String? championship;
+  double? rate;
+
+  Games2.fromJsonAll(Map<String, dynamic> json)
+      : id = json['id'],
+        team1name = json['team1'],
+        team2name = json['team2'],
+        team1score = json['score1'],
+        team2score = json['score2'],
+        country1 = json['country1'],
+        country2 = json['country2'],
+        date = DateTime.parse(json['date']),
+        championship = json['championship'],
+        rate = double.parse(json['rate']),
+        type = _toGameType(json['type']);
+
+  Games2.fromJsonProfile(Map<String, dynamic> json)
+      : id = json['id'],
+        team1name = json['team1'],
+        team2name = json['team2'],
+        team1score = json['score1'],
+        team2score = json['score2'];
+
+  String scorebord() {
+    return "${team1score ?? ''} x ${team2score ?? ''}";
+  }
+}
+
+class GamesRepository extends ChangeNotifier {
+  List<Games2> games = [];
+  List<Games2> now = [];
+  List<Games2> today = [];
+
+  Future<void> updateRise() async {
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/rise'))
+          .timeout(const Duration(seconds: 5));
+      debugPrint("get");
+      if (response.statusCode == 200) {
+        games = [];
+        for (var i in jsonDecode(response.body)) {
+          games.add(Games2.fromJsonAll(i));
+        }
+      } else {
+        debugPrint("Erro");
+        games = [];
+      }
+    } catch (e) {
+      debugPrint("Erro");
+      games = [];
+    } finally {
+      debugPrint("Atualizado");
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateNow() async {
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/now'))
+          .timeout(const Duration(seconds: 5));
+      debugPrint("get");
+      if (response.statusCode == 200) {
+        now = [];
+        for (var i in jsonDecode(response.body)) {
+          now.add(Games2.fromJsonAll(i));
+        }
+      } else {
+        debugPrint("Erro");
+        now = [];
+      }
+    } catch (e) {
+      debugPrint("Erro");
+      now = [];
+    } finally {
+      debugPrint("Atualizado");
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateToday() async {
+    try {
+      final response = await http
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/today'))
+          .timeout(const Duration(seconds: 5));
+      debugPrint("get");
+      if (response.statusCode == 200) {
+        today = [];
+        for (var i in jsonDecode(response.body)) {
+          today.add(Games2.fromJsonAll(i));
+        }
+      } else {
+        debugPrint("Erro");
+        today = [];
+      }
+    } catch (e) {
+      debugPrint("Erro");
+      today = [];
+    } finally {
+      debugPrint("Atualizado");
+      notifyListeners();
+    }
+  }
+
+  GamesRepository();
+}

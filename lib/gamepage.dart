@@ -6,7 +6,7 @@ import 'package:goalboxd/review.dart';
 import 'package:marquee/marquee.dart';
 
 class GamePage extends StatefulWidget {
-  final Games game;
+  final Games2 game;
   const GamePage({super.key, required this.game});
 
   @override
@@ -16,7 +16,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  late Games game;
+  late Games2 game;
   final controller = TextEditingController();
 
   @override
@@ -48,7 +48,7 @@ class _GamePageState extends State<GamePage> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     FutureBuilder(
-                      future: Complements.getTeam(game.team1name),
+                      future: Complements.getTeam(game.team1name ?? ""),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -82,14 +82,14 @@ class _GamePageState extends State<GamePage> {
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
-                        _marqueeOrNot(game.team1name),
+                        _marqueeOrNot(game.team1name ?? ""),
                         Text(game.scorebord(),
                             style: const TextStyle(fontSize: 20)),
-                        _marqueeOrNot(game.team2name)
+                        _marqueeOrNot(game.team2name ?? "")
                       ],
                     ),
                     FutureBuilder(
-                      future: Complements.getTeam(game.team2name),
+                      future: Complements.getTeam(game.team2name ?? ""),
                       builder: (context, snapshot) {
                         if (snapshot.connectionState ==
                             ConnectionState.waiting) {
@@ -228,17 +228,15 @@ class _ComentarioPlaceholder extends StatelessWidget {
 }
 
 class _CommentWidget extends StatefulWidget {
-  final Games game;
+  final Games2 game;
   const _CommentWidget({required this.game});
 
   @override
-  State<StatefulWidget> createState() {
-    return _CommentWidgetState();
-  }
+  State<StatefulWidget> createState() => _CommentWidgetState();
 }
 
 class _CommentWidgetState extends State<_CommentWidget> {
-  late Games game;
+  late Games2 game;
   final controller = TextEditingController();
   List<Comments> comments = [];
   int commentPage = 0;
@@ -247,7 +245,7 @@ class _CommentWidgetState extends State<_CommentWidget> {
 
   Future<void> _refreshComments() async {
     List<Comments> newComments =
-        await Comments.getComments(game.id, commentPage);
+        await Comments.getComments(game.id!, commentPage);
     setState(() {
       comments.addAll(newComments);
       endOfComments = newComments.length < 10;
@@ -324,7 +322,7 @@ class _CommentWidgetState extends State<_CommentWidget> {
                     onPressed: () async {
                       if (controller.text.isNotEmpty) {
                         await Comments.postComment(
-                            game.id, controller.text.toString());
+                            game.id!, controller.text.toString());
                         controller.clear();
                         _refreshComments();
                       }

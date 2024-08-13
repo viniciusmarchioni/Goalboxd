@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/games.dart';
+import 'package:http/http.dart' as http;
 
 class Review extends StatefulWidget {
   final int? phate;
-  final Games game;
+  final Games2 game;
   const Review({super.key, required this.phate, required this.game});
 
   @override
@@ -14,7 +15,7 @@ class Review extends StatefulWidget {
 
 class _ReviewState extends State<Review> {
   late int hate;
-  late Games game;
+  late Games2 game;
 
   @override
   void initState() {
@@ -28,7 +29,7 @@ class _ReviewState extends State<Review> {
   }
 
   Future<void> _loadGrade() async {
-    final grade = await Games.getReview(game.id);
+    final grade = await Games.getReview(game.id!);
     setState(() {
       hate = grade;
     });
@@ -45,7 +46,7 @@ class _ReviewState extends State<Review> {
                 ? const Icon(Icons.star)
                 : const Icon(Icons.star_border),
             onTap: () async {
-              await Games.postReview(count, game.id);
+              await Games.postReview(count, game.id!);
               setState(() {
                 hate = count;
               });

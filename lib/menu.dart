@@ -7,6 +7,7 @@ import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:marquee/marquee.dart';
+import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Menu extends StatefulWidget {
@@ -17,18 +18,13 @@ class Menu extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
-  late Future<List<Games>> _futureGames;
-  late Future<List<Games>> _futureNowGames;
-  late Future<List<Games>> _futureTodayGames;
   late final TabController _tabController;
+  bool iniciar = true;
 
   @override
   void initState() {
     super.initState();
     _tabController = TabController(length: 3, vsync: this);
-    _futureGames = Games.getRiseGames();
-    _futureNowGames = Games.getNowGames();
-    _futureTodayGames = Games.getTodayGames();
   }
 
   @override
@@ -37,26 +33,16 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
     _tabController.dispose();
   }
 
-  Future<void> _refreshGames() async {
-    setState(() {
-      _futureGames = Games.getRiseGames();
-    });
-  }
-
-  Future<void> _refreshNowGames() async {
-    setState(() {
-      _futureNowGames = Games.getNowGames();
-    });
-  }
-
-  Future<void> _refreshTodayGames() async {
-    setState(() {
-      _futureTodayGames = Games.getTodayGames();
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
+    final gamesRepository = Provider.of<GamesRepository>(context);
+    if (iniciar) {
+      gamesRepository.updateRise();
+      gamesRepository.updateNow();
+      gamesRepository.updateToday();
+      iniciar = false;
+    }
+
     return Scaffold(
         appBar: AppBar(
           flexibleSpace: Container(
@@ -107,97 +93,56 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
         body: TabBarView(
           controller: _tabController,
           children: [
-            FutureBuilder(
-              future: _futureGames,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                    color: Colors.blue,
-                  ));
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text('Falha de conexão'));
-                } else {
-                  return RefreshIndicator(
-                    color: Colors.blue,
-                    onRefresh: _refreshGames,
-                    child: ListView(
-                      children: [
-                        for (Games game in snapshot.data ?? [])
-                          _listPlaceHolder(game),
-                      ],
-                    ),
-                  );
-                }
+            RefreshIndicator(
+              onRefresh: () async {
+                gamesRepository.updateRise();
               },
+              child: ListView.builder(
+                itemCount: gamesRepository.games.length,
+                itemBuilder: (context, index) {
+                  return _listPlaceHolder2(gamesRepository.games[index]);
+                },
+              ),
             ),
-            FutureBuilder(
-              future: _futureNowGames,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                    color: Colors.blue,
-                  ));
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text('Falha de conexão'));
-                } else {
-                  return RefreshIndicator(
-                    color: Colors.blue,
-                    onRefresh: _refreshNowGames,
-                    child: ListView(
-                      children: [
-                        for (Games game in snapshot.data ?? [])
-                          _listPlaceHolder(game),
-                      ],
-                    ),
-                  );
-                }
+            RefreshIndicator(
+              onRefresh: () async {
+                gamesRepository.updateNow();
               },
+              child: ListView.builder(
+                itemCount: gamesRepository.now.length,
+                itemBuilder: (context, index) {
+                  return _listPlaceHolder2(gamesRepository.now[index]);
+                },
+              ),
             ),
-            FutureBuilder(
-              future: _futureTodayGames,
-              builder: (context, snapshot) {
-                if (snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(
-                      child: CircularProgressIndicator(
-                    color: Colors.blue,
-                  ));
-                } else if (snapshot.hasError) {
-                  return const Center(child: Text('Falha de conexão'));
-                } else {
-                  return RefreshIndicator(
-                    color: Colors.blue,
-                    onRefresh: _refreshTodayGames,
-                    child: ListView(
-                      children: [
-                        for (Games game in snapshot.data ?? [])
-                          _listPlaceHolder(game),
-                      ],
-                    ),
-                  );
-                }
+            RefreshIndicator(
+              onRefresh: () async {
+                gamesRepository.updateToday();
               },
+              child: ListView.builder(
+                itemCount: gamesRepository.today.length,
+                itemBuilder: (context, index) {
+                  return _listPlaceHolder2(gamesRepository.today[index]);
+                },
+              ),
             )
           ],
         ));
   }
 
-  GestureDetector _listPlaceHolder(Games game) {
+  GestureDetector _listPlaceHolder2(Games2 game) {
     DateTime now = DateTime.now();
     return GestureDetector(
       onTap: () {
-        Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-          return GamePage(
-            game: game,
-          );
-        }));
+        Navigator.of(context).push(MaterialPageRoute(
+          builder: (context) => GamePage(game: game),
+        ));
       },
       child: Container(
         height: 100,
         margin: const EdgeInsets.all(5),
         decoration: BoxDecoration(
-            border: _borderDefine(game.championship),
+            border: _borderDefine(game.championship!),
             borderRadius: const BorderRadius.all(Radius.circular(10))),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -205,19 +150,19 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
             game.type == GameType.football
                 ? const Icon(Icons.sports_soccer)
                 : const Icon(Icons.sports_basketball_outlined),
-            _marqueeOrNot(game.team1name),
+            _marqueeOrNot(game.team1name!),
             Text(game.scorebord()),
-            _marqueeOrNot(game.team2name),
+            _marqueeOrNot(game.team2name!),
             Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                if (now.isBefore(game.date)) ...[
+                if (now.isBefore(game.date!)) ...[
                   const Icon(Icons.timer_sharp),
                   Text(
-                      '${game.date.hour.toString()}:${game.date.minute.toString()}h')
+                      '${game.date!.hour.toString()}:${game.date!.minute.toString()}h')
                 ] else ...[
                   const Icon(Icons.star_half_rounded),
-                  Text(game.rate.toStringAsFixed(1))
+                  Text(game.rate!.toStringAsFixed(1))
                 ]
               ],
             )
