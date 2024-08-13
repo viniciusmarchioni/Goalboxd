@@ -5,7 +5,6 @@ import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/settingspage.dart';
-import 'package:goalboxd/userprofile.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 import 'package:provider/provider.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -32,29 +31,33 @@ void main() async {
         title: 'Goalboxd',
         routes: {
           '/home': (context) => const HomeScreen(),
-          //'/user': (context) => const UserProfile(),
           '/settings': (context) => const Settings()
         },
       ),
     ));
   } else {
-    runApp(const MyApp());
+    runApp(MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (context) => GamesRepository(),
+        ),
+        ChangeNotifierProvider(
+          create: (context) => RepositoryProfileGame(),
+        )
+      ],
+      child: MaterialApp(
+        home: const MyApp(),
+        theme: ThemeData(useMaterial3: true),
+        title: 'Goalboxd',
+        routes: {
+          '/home': (context) => const HomeScreen(),
+          '/settings': (context) => const Settings()
+        },
+      ),
+    ));
   }
 }
 
-/*
-MaterialApp(
-      home: const Menu(),
-      theme: ThemeData(useMaterial3: true),
-      title: 'Goalboxd',
-      routes: {
-        '/home': (context) => const HomeScreen(),
-        '/user': (context) => const UserProfile(),
-        '/settings': (context) => const Settings()
-      },
-    )
-
- */
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
 
@@ -66,7 +69,6 @@ class MyApp extends StatelessWidget {
       home: const HomeScreen(),
       routes: {
         '/home': (context) => const Menu(),
-        //'/user': (context) => const UserProfile(),
         '/settings': (context) => const Settings()
       },
     );

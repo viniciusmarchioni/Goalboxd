@@ -245,7 +245,6 @@ class _CommentWidgetState extends State<_CommentWidget> {
   List<Comments> comments = [];
   int commentPage = 0;
   bool endOfComments = false;
-  final ScrollController _controllerComment = ScrollController();
 
   Future<void> _refreshComments() async {
     List<Comments> newComments =
@@ -259,86 +258,82 @@ class _CommentWidgetState extends State<_CommentWidget> {
 
   @override
   void initState() {
-    _controllerComment.addListener(_scrollListener);
     game = widget.game;
     _refreshComments();
     super.initState();
   }
 
-  void _scrollListener() {
-    if (_controllerComment.position.pixels ==
-            _controllerComment.position.maxScrollExtent &&
-        !endOfComments) {
-      _refreshComments();
-    }
+  @override
+  void dispose() {
+    super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Container(
-          decoration: const BoxDecoration(
-              borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(20), topRight: Radius.circular(20)),
-              color: Color.fromARGB(115, 12, 11, 10)),
-          height: 400,
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.spaceAround,
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              const Text("Comentarios:",
-                  style: TextStyle(fontSize: 25, color: Colors.white)),
-              SizedBox(
-                height: 250,
-                width: MediaQuery.of(context).size.width,
-                child: ListView.builder(
-                  controller: _controllerComment,
-                  itemCount: comments.length,
-                  itemBuilder: (context, index) {
-                    return _ComentarioPlaceholder(comment: comments[index]);
-                  },
-                ),
-              ),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceAround,
-                children: [
-                  Container(
-                      margin: const EdgeInsets.only(bottom: 10),
-                      height: 75,
-                      width: 270,
-                      child: TextField(
-                        controller: controller,
-                        maxLines: 10,
-                        cursorColor: Colors.blue,
-                        decoration: const InputDecoration(
-                            fillColor: Colors.white,
-                            focusedBorder: OutlineInputBorder(
-                              borderSide: BorderSide(color: Colors.blue),
-                            ),
-                            border: OutlineInputBorder(),
-                            hintText: "Comentario"),
-                      )),
-                  ElevatedButton(
-                    style: const ButtonStyle(
-                        foregroundColor: MaterialStatePropertyAll(Colors.blue)),
-                    onPressed: () async {
-                      if (controller.text.isNotEmpty) {
-                        await Comments.postComment(
-                            game.id!, controller.text.toString());
-                        controller.clear();
-                        _refreshComments();
-                      }
+    return Expanded(
+      child: DraggableScrollableSheet(
+        maxChildSize: 1,
+        minChildSize: 0.5,
+        initialChildSize: 0.5,
+        builder: (context, scrollController) {
+          scrollController.addListener(() {
+            if (scrollController.position.pixels ==
+                    scrollController.position.maxScrollExtent &&
+                !endOfComments) {
+              _refreshComments();
+            }
+          });
+
+          return Container(
+            decoration: const BoxDecoration(
+                borderRadius: BorderRadius.only(
+                    topLeft: Radius.circular(20),
+                    topRight: Radius.circular(20)),
+                color: Colors.blue),
+            child: Column(
+              children: [
+                const Text("Comentários"),
+                Expanded(
+                  child: ListView.builder(
+                    controller: scrollController,
+                    itemCount: comments.length,
+                    itemBuilder: (context, index) {
+                      return _ComentarioPlaceholder(comment: comments[index]);
                     },
-                    child: const Text("Enviar"),
-                  )
-                ],
-              )
-            ],
-          ),
-        ),
-      ],
+                  ),
+                ),
+                Row(
+                  children: [
+                    Expanded(
+                        child: TextField(
+                      controller: controller,
+                      maxLines: 2,
+                      cursorColor: Colors.white,
+                      decoration: const InputDecoration(
+                          fillColor: Colors.white,
+                          focusedBorder: OutlineInputBorder(),
+                          border: OutlineInputBorder(),
+                          hintText: "Comentario"),
+                    )),
+                    ElevatedButton(
+                      onPressed: () async {
+                        if (controller.text.isNotEmpty) {
+                          await Comments.postComment(game.id!, controller.text);
+                          controller.clear();
+                        }
+                      },
+                      style: const ButtonStyle(
+                          foregroundColor:
+                              MaterialStatePropertyAll(Colors.blue)),
+                      child: const Text("Enviar"),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          );
+        },
+      ),
     );
   }
 }
