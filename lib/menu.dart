@@ -130,7 +130,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
         ));
   }
 
-  GestureDetector _listPlaceHolder2(Games2 game) {
+  GestureDetector _listPlaceHolder2(Games game) {
     DateTime now = DateTime.now();
     return GestureDetector(
       onTap: () {
@@ -239,7 +239,9 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 await user.getProfile(prefs.getInt('id')!);
                 if (context.mounted) {
                   Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                    return const UserProfile();
+                    return UserProfile(
+                      user: user,
+                    );
                   }));
                 }
               },

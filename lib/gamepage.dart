@@ -1,12 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
+import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/otheruserprofile.dart';
 import 'package:goalboxd/review.dart';
 import 'package:marquee/marquee.dart';
 
 class GamePage extends StatefulWidget {
-  final Games2 game;
+  final Games game;
   const GamePage({super.key, required this.game});
 
   @override
@@ -16,7 +17,7 @@ class GamePage extends StatefulWidget {
 }
 
 class _GamePageState extends State<GamePage> {
-  late Games2 game;
+  late Games game;
   final controller = TextEditingController();
 
   @override
@@ -194,13 +195,16 @@ class _ComentarioPlaceholder extends StatelessWidget {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           RawMaterialButton(
-              onPressed: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                  return OtherUserProfile(
-                    userid: comment.userid,
-                    username: comment.username,
-                  );
-                }));
+              onPressed: () async {
+                User user = User();
+                await user.getProfile(comment.userid);
+                if (context.mounted) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return OtherUserProfile(
+                      user: user,
+                    );
+                  }));
+                }
               },
               child: CircleAvatar(
                   radius: 20,
@@ -228,7 +232,7 @@ class _ComentarioPlaceholder extends StatelessWidget {
 }
 
 class _CommentWidget extends StatefulWidget {
-  final Games2 game;
+  final Games game;
   const _CommentWidget({required this.game});
 
   @override
@@ -236,7 +240,7 @@ class _CommentWidget extends StatefulWidget {
 }
 
 class _CommentWidgetState extends State<_CommentWidget> {
-  late Games2 game;
+  late Games game;
   final controller = TextEditingController();
   List<Comments> comments = [];
   int commentPage = 0;

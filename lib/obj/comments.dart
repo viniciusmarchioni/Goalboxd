@@ -75,20 +75,20 @@ class Comments {
 }
 
 class ProfileGameComment {
-  late Games2 game;
+  late Games game;
   late String comment;
 
   ProfileGameComment.fromJson(Map<String, dynamic> json)
-      : game = Games2.fromJsonProfile(json),
+      : game = Games.fromJsonProfile(json),
         comment = json['comment'];
 }
 
 class ProfileGameReview {
-  late Games2 game;
+  late Games game;
   late int review;
 
   ProfileGameReview.fromJson(Map<String, dynamic> json)
-      : game = Games2.fromJsonProfile(json),
+      : game = Games.fromJsonProfile(json),
         review = json['nota'];
 }
 

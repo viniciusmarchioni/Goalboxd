@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/menu.dart';
+import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/settingspage.dart';
@@ -22,7 +23,7 @@ void main() async {
           create: (context) => GamesRepository(),
         ),
         ChangeNotifierProvider(
-          create: (context) => GamesRepository(),
+          create: (context) => RepositoryProfileGame(),
         )
       ],
       child: MaterialApp(
@@ -31,7 +32,7 @@ void main() async {
         title: 'Goalboxd',
         routes: {
           '/home': (context) => const HomeScreen(),
-          '/user': (context) => const UserProfile(),
+          //'/user': (context) => const UserProfile(),
           '/settings': (context) => const Settings()
         },
       ),
@@ -65,7 +66,7 @@ class MyApp extends StatelessWidget {
       home: const HomeScreen(),
       routes: {
         '/home': (context) => const Menu(),
-        '/user': (context) => const UserProfile(),
+        //'/user': (context) => const UserProfile(),
         '/settings': (context) => const Settings()
       },
     );
