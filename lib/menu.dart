@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
-import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
-import 'package:goalboxd/settingspage.dart';
 import 'package:goalboxd/userprofile.dart';
 import 'package:gradient_borders/gradient_borders.dart';
 import 'package:marquee/marquee.dart';
@@ -248,19 +246,14 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
             ),
             PopupMenuItem(
               onTap: () {
-                Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                  return const Settings();
-                }));
+                Navigator.of(context).pushNamed('/settings');
               },
               child: const Text('Configurações'),
             ),
             PopupMenuItem(
               onTap: () {
                 prefs.clear();
-                Navigator.of(context)
-                    .pushReplacement(MaterialPageRoute(builder: (_) {
-                  return const MyApp();
-                }));
+                Navigator.of(context).pushReplacementNamed('/login');
               },
               child: const Text('Sair'),
             ),
@@ -276,18 +269,33 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
               backgroundImage: AssetImage('yuri.jpg'), maxRadius: 20),
           onPressed: () => PopupMenuButton(
                 itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    onTap: null,
+                  PopupMenuItem(
+                    onTap: () async {
+                      User user = User();
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
+                      await user.getProfile(prefs.getInt('id')!);
+                      if (context.mounted) {
+                        Navigator.of(context)
+                            .push(MaterialPageRoute(builder: (_) {
+                          return UserProfile(
+                            user: user,
+                          );
+                        }));
+                      }
+                    },
                     child: Text('Perfil'),
                   ),
-                  const PopupMenuItem(
-                    onTap: null,
-                    child: Text('Configurações'),
+                  PopupMenuItem(
+                    onTap: () {
+                      Navigator.of(context).pushNamed('/settings');
+                    },
+                    child: const Text('Configurações'),
                   ),
                   PopupMenuItem(
                     onTap: () {
                       prefs.clear();
-                      Navigator.of(context).pushReplacementNamed('/home');
+                      Navigator.of(context).pushReplacementNamed('/login');
                     },
                     child: const Text('Sair'),
                   ),

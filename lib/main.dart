@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:goalboxd/aboutpage.dart';
 import 'package:goalboxd/menu.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
@@ -22,7 +23,9 @@ void main() async {
         theme: ThemeData(useMaterial3: true),
         title: 'Goalboxd',
         routes: {
-          '/home': (context) => const HomeScreen(),
+          '/about': (context) => const About(),
+          '/login': (context) => const LoginPage(),
+          '/home': (context) => const Menu(),
           '/settings': (context) => const Settings()
         },
       ),
@@ -31,11 +34,13 @@ void main() async {
     runApp(ChangeNotifierProvider(
       create: (context) => GamesRepository(),
       child: MaterialApp(
-        home: const MyApp(),
+        home: const LoginPage(),
         theme: ThemeData(useMaterial3: true),
         title: 'Goalboxd',
         routes: {
-          '/home': (context) => const HomeScreen(),
+          '/about': (context) => const About(),
+          '/login': (context) => const LoginPage(),
+          '/home': (context) => const Menu(),
           '/settings': (context) => const Settings()
         },
       ),
@@ -43,25 +48,8 @@ void main() async {
   }
 }
 
-class MyApp extends StatelessWidget {
-  const MyApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Goalboxd',
-      theme: ThemeData(useMaterial3: true),
-      home: const HomeScreen(),
-      routes: {
-        '/home': (context) => const Menu(),
-        '/settings': (context) => const Settings()
-      },
-    );
-  }
-}
-
-class HomeScreen extends StatelessWidget {
-  const HomeScreen({super.key});
+class LoginPage extends StatelessWidget {
+  const LoginPage({super.key});
 
   @override
   Widget build(BuildContext context) {

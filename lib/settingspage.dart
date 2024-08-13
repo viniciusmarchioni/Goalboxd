@@ -111,6 +111,8 @@ class SettingsState extends State {
             ),
           ]),
           TextButton(
+              style: const ButtonStyle(
+                  foregroundColor: MaterialStatePropertyAll(Colors.blue)),
               onPressed: () {
                 Navigator.of(context)
                     .pushReplacement(MaterialPageRoute(builder: (_) {
