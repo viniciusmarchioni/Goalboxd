@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/menu.dart';
-import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/settingspage.dart';
@@ -16,15 +15,8 @@ void main() async {
   await dotenv.load(fileName: ".env");
 
   if (prefs.getInt('id') != null) {
-    runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => GamesRepository(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => RepositoryProfileGame(),
-        )
-      ],
+    runApp(ChangeNotifierProvider(
+      create: (context) => GamesRepository(),
       child: MaterialApp(
         home: const Menu(),
         theme: ThemeData(useMaterial3: true),
@@ -36,15 +28,8 @@ void main() async {
       ),
     ));
   } else {
-    runApp(MultiProvider(
-      providers: [
-        ChangeNotifierProvider(
-          create: (context) => GamesRepository(),
-        ),
-        ChangeNotifierProvider(
-          create: (context) => RepositoryProfileGame(),
-        )
-      ],
+    runApp(ChangeNotifierProvider(
+      create: (context) => GamesRepository(),
       child: MaterialApp(
         home: const MyApp(),
         theme: ThemeData(useMaterial3: true),

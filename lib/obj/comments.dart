@@ -92,7 +92,7 @@ class ProfileGameReview {
         review = json['nota'];
 }
 
-class RepositoryProfileGame extends ChangeNotifier {
+class ProfileRepository {
   List<ProfileGameComment> comments = [];
   List<ProfileGameReview> reviews = [];
   int _pageComments = 0;
@@ -119,7 +119,8 @@ class RepositoryProfileGame extends ChangeNotifier {
           _pageComments += 10;
           comments.addAll(profileGameComment);
           endComments = profileGameComment.length < 10;
-          notifyListeners();
+          debugPrint(_pageComments.toString());
+          debugPrint(comments.toString());
         } else {
           return;
         }
@@ -149,7 +150,6 @@ class RepositoryProfileGame extends ChangeNotifier {
           endReview = profileGameReview.length < 10;
           _pageReviews += 10;
           reviews.addAll(profileGameReview);
-          notifyListeners();
         } else {
           return;
         }
@@ -160,5 +160,5 @@ class RepositoryProfileGame extends ChangeNotifier {
     }
   }
 
-  RepositoryProfileGame();
+  ProfileRepository();
 }

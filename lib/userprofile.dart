@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comments.dart';
 import 'package:goalboxd/obj/user.dart';
-import 'package:provider/provider.dart';
 
 class UserProfile extends StatefulWidget {
   final User user;
@@ -17,38 +16,54 @@ class _UserProfileState extends State<UserProfile>
   late User user;
   final ScrollController controllerComment = ScrollController();
   final ScrollController controllerReview = ScrollController();
-  late RepositoryProfileGame repositoryProfileGame;
+  late ProfileRepository repositoryProfileGame;
 
   @override
   void initState() {
     super.initState();
     user = widget.user;
     _tabController = TabController(length: 2, vsync: this);
-    repositoryProfileGame = Provider.of<RepositoryProfileGame>(context,
-        listen: false); //inicia o provider
+    repositoryProfileGame = ProfileRepository();
 
-    repositoryProfileGame.setProfileComment(null); //adiciona nas listas
-    repositoryProfileGame.setProfileReview(null); //valores padrões
+    updateComment(); //adiciona nas listas
+    updateReview(); //valores padrões
 
-    controllerComment.addListener(() {
-      //adiciona ao terminar de scrollar
-      if (controllerComment.position.pixels ==
-          controllerComment.position.maxScrollExtent) {
-        repositoryProfileGame.setProfileComment(null);
-      }
+    controllerComment.addListener(_scrollComment);
+    controllerReview.addListener(_scrollReview);
+  }
+
+  void _scrollComment() {
+    if (controllerComment.position.pixels ==
+        controllerComment.position.maxScrollExtent) {
+      updateComment();
+    }
+  }
+
+  void _scrollReview() {
+    if (controllerComment.position.pixels ==
+        controllerComment.position.maxScrollExtent) {
+      updateReview();
+    }
+  }
+
+  Future updateComment() async {
+    await repositoryProfileGame.setProfileComment(user.id);
+    setState(() {
+      repositoryProfileGame = repositoryProfileGame;
     });
-    controllerReview.addListener(() {
-      //adiciona ao terminar de scrollar
-      if (controllerComment.position.pixels ==
-          controllerComment.position.maxScrollExtent) {
-        repositoryProfileGame.setProfileReview(null);
-      }
+  }
+
+  Future updateReview() async {
+    await repositoryProfileGame.setProfileReview(user.id);
+    setState(() {
+      repositoryProfileGame = repositoryProfileGame;
     });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _tabController.dispose();
     controllerComment.dispose();
     controllerReview.dispose();
   }
@@ -101,27 +116,20 @@ class _UserProfileState extends State<UserProfile>
           ),
           Expanded(
             child: TabBarView(controller: _tabController, children: [
-              Consumer<RepositoryProfileGame>(
-                builder: (context, value, child) {
-                  return ListView.builder(
-                    itemCount: value.reviews.length,
-                    itemBuilder: (context, index) {
-                      return _buildReviewItem(value.reviews[index]);
-                    },
-                  );
+              ListView.builder(
+                itemCount: repositoryProfileGame.reviews.length,
+                itemBuilder: (context, index) {
+                  return _buildReviewItem(repositoryProfileGame.reviews[index]);
                 },
               ),
-              Consumer<RepositoryProfileGame>(
-                builder: (context, value, child) {
-                  return ListView.builder(
-                    controller: controllerComment,
-                    itemCount: value.comments.length,
-                    itemBuilder: (context, index) {
-                      return _buildCommentItem(value.comments[index]);
-                    },
-                  );
+              ListView.builder(
+                controller: controllerComment,
+                itemCount: repositoryProfileGame.comments.length,
+                itemBuilder: (context, index) {
+                  return _buildCommentItem(
+                      repositoryProfileGame.comments[index]);
                 },
-              ),
+              )
             ]),
           )
         ],

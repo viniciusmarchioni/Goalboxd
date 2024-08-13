@@ -16,17 +16,17 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   late User user;
   final ScrollController controllerComment = ScrollController();
   final ScrollController controllerReview = ScrollController();
-  late RepositoryProfileGame repositoryProfileGame;
+  late ProfileRepository repositoryProfileGame;
 
   @override
   void initState() {
     super.initState();
     user = widget.user;
     _tabController = TabController(length: 2, vsync: this);
-    repositoryProfileGame = RepositoryProfileGame(); //inicia o provider
+    repositoryProfileGame = ProfileRepository();
 
-    //updateComment(); //adiciona nas listas
-    //updateReview(); //valores padrões
+    updateComment(); //adiciona nas listas
+    updateReview(); //valores padrões
 
     controllerComment.addListener(_scrollComment);
     controllerReview.addListener(_scrollReview);
@@ -47,20 +47,23 @@ class _OtherUserProfileState extends State<OtherUserProfile>
   }
 
   Future updateComment() async {
+    await repositoryProfileGame.setProfileComment(user.id);
     setState(() {
-      repositoryProfileGame.setProfileComment(user.id);
+      repositoryProfileGame = repositoryProfileGame;
     });
   }
 
   Future updateReview() async {
+    await repositoryProfileGame.setProfileReview(user.id);
     setState(() {
-      repositoryProfileGame.setProfileReview(user.id);
+      repositoryProfileGame = repositoryProfileGame;
     });
   }
 
   @override
   void dispose() {
     super.dispose();
+    _tabController.dispose();
     controllerComment.dispose();
     controllerReview.dispose();
   }
@@ -126,7 +129,7 @@ class _OtherUserProfileState extends State<OtherUserProfile>
                   return _buildCommentItem(
                       repositoryProfileGame.comments[index]);
                 },
-              ),
+              )
             ]),
           )
         ],
