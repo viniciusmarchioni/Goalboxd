@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:goalboxd/aboutpage.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Settings extends StatefulWidget {
@@ -114,10 +113,7 @@ class SettingsState extends State {
               style: const ButtonStyle(
                   foregroundColor: MaterialStatePropertyAll(Colors.blue)),
               onPressed: () {
-                Navigator.of(context)
-                    .pushReplacement(MaterialPageRoute(builder: (_) {
-                  return const About();
-                }));
+                Navigator.of(context).pushNamed('/about');
               },
               child: const Text("--Sobre--"))
         ],

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/gamepage.dart';
+import 'package:goalboxd/main.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/userprofile.dart';
@@ -253,7 +254,12 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
             PopupMenuItem(
               onTap: () {
                 prefs.clear();
-                Navigator.of(context).pushReplacementNamed('/login');
+                Navigator.of(context).pushAndRemoveUntil(
+                  MaterialPageRoute(
+                    builder: (context) => const LoginPage(),
+                  ),
+                  (Route<dynamic> route) => false,
+                );
               },
               child: const Text('Sair'),
             ),
@@ -295,7 +301,12 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                   PopupMenuItem(
                     onTap: () {
                       prefs.clear();
-                      Navigator.of(context).pushReplacementNamed('/login');
+                      Navigator.of(context).pushAndRemoveUntil(
+                        MaterialPageRoute(
+                          builder: (context) => const LoginPage(),
+                        ),
+                        (Route<dynamic> route) => false,
+                      );
                     },
                     child: const Text('Sair'),
                   ),
