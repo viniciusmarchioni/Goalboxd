@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:goalboxd/obj/comments.dart';
+import 'package:goalboxd/obj/comment.dart';
 import 'package:goalboxd/obj/user.dart';
 
 class UserProfile extends StatefulWidget {

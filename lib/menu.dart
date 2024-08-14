@@ -284,7 +284,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                         }));
                       }
                     },
-                    child: Text('Perfil'),
+                    child: const Text('Perfil'),
                   ),
                   PopupMenuItem(
                     onTap: () {

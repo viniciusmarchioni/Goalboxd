@@ -7,9 +7,8 @@ import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
 class Review extends StatefulWidget {
-  final int? phate;
   final Games game;
-  const Review({super.key, required this.phate, required this.game});
+  const Review({super.key, required this.game});
 
   @override
   State<StatefulWidget> createState() {
