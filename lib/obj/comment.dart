@@ -72,15 +72,38 @@ class Comments {
       return false;
     }
   }
+
+  static Future<bool> deleteComment(int commentid) async {
+    try {
+      final response = await http
+          .delete(
+            Uri.parse('${dotenv.env['API_URL']}/users/comment/$commentid'),
+          )
+          .timeout(const Duration(seconds: 5));
+
+      if (response.statusCode == 200) {
+        return true;
+      } else {
+        return false;
+      }
+    } on TimeoutException {
+      debugPrint('----------------TIMEOUT------------');
+      return false;
+    } catch (e) {
+      return false;
+    }
+  }
 }
 
 class ProfileGameComment {
   late Games game;
+  late int id;
   late String comment;
 
   ProfileGameComment.fromJson(Map<String, dynamic> json)
       : game = Games.fromJsonProfile(json),
-        comment = json['comment'];
+        comment = json['comment'],
+        id = json['commentid'];
 }
 
 class ProfileGameReview {
@@ -119,8 +142,6 @@ class ProfileRepository {
           _pageComments += 10;
           comments.addAll(profileGameComment);
           endComments = profileGameComment.length < 10;
-          debugPrint(_pageComments.toString());
-          debugPrint(comments.toString());
         } else {
           return;
         }

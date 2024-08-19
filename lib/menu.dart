@@ -191,29 +191,33 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
     );
   }
 
+  //CONMEBOL Libertadores
   BoxBorder _borderDefine(String championship) {
-    if (championship == 'Serie A') {
-      return Border.all(color: Colors.blue);
-    } else if (championship == 'Libertadores') {
-      return const GradientBoxBorder(
-          gradient: SweepGradient(colors: [
-        Color.fromARGB(255, 218, 218, 52),
-        Colors.black,
-      ]));
-    } else if (championship == 'Euro Championship') {
-      return const GradientBoxBorder(
-          gradient: LinearGradient(colors: [
-        Colors.redAccent,
-        Colors.greenAccent,
-        Colors.yellowAccent,
-        Colors.blueAccent
-      ]));
-    } else if (championship == 'Serie B') {
-      return Border.all(color: Colors.green);
-    } else if (championship == 'Copa Do Brasil') {
-      return const GradientBoxBorder(
-          gradient: SweepGradient(
-              colors: [Colors.blue, Colors.green, Colors.yellow]));
+    switch (championship) {
+      case "CONMEBOL Libertadores":
+        const GradientBoxBorder(
+            gradient: SweepGradient(colors: [
+          Color.fromARGB(255, 218, 218, 52),
+          Colors.black,
+        ]));
+
+      case "CONMEBOL Sudamericana":
+        const GradientBoxBorder(
+            gradient: SweepGradient(colors: [
+          Color.fromARGB(255, 218, 218, 52),
+          Color.fromARGB(255, 0, 26, 255),
+        ]));
+
+      case "Serie A":
+        return Border.all(color: Colors.blue);
+
+      case "Serie B":
+        return Border.all(color: Colors.green);
+
+      case "Copa Do Brasil":
+        return const GradientBoxBorder(
+            gradient: SweepGradient(
+                colors: [Colors.blue, Colors.green, Colors.yellow]));
     }
     return Border.all(color: Colors.black);
   }

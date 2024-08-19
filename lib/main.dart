@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:goalboxd/aboutpage.dart';
+import 'package:goalboxd/deletepage.dart';
 import 'package:goalboxd/menu.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
@@ -26,7 +27,8 @@ void main() async {
           '/about': (context) => const About(),
           '/login': (context) => const LoginPage(),
           '/home': (context) => const Menu(),
-          '/settings': (context) => const Settings()
+          '/settings': (context) => const Settings(),
+          '/delete': (context) => const DeletePage()
         },
       ),
     ));
@@ -41,7 +43,8 @@ void main() async {
           '/about': (context) => const About(),
           '/login': (context) => const LoginPage(),
           '/home': (context) => const Menu(),
-          '/settings': (context) => const Settings()
+          '/settings': (context) => const Settings(),
+          '/delete': (context) => const DeletePage()
         },
       ),
     ));

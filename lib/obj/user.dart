@@ -88,6 +88,37 @@ class User {
     }
   }
 
+  Future<void> editUsername(String newName) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    try {
+      final response = await http.put(
+        Uri.parse('${dotenv.env['API_URL']}/users/edit'),
+        body: jsonEncode({
+          'username': newName,
+          'userid': prefs.getInt('id'),
+        }),
+        headers: {
+          "Accept": "application/json",
+          "content-type": "application/json"
+        },
+      ).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        final jsonResponse = json.decode(response.body);
+        User user = User.fromJsonToLogin(jsonResponse);
+        username = user.username;
+        id = user.id;
+        prefs.setInt('id', id);
+        prefs.setString('username', username);
+      } else {
+        throw Exception('Erro response');
+      }
+    } on TimeoutException {
+      throw Exception('Timeout');
+    } catch (e) {
+      throw Exception('Erro Catch: $e');
+    }
+  }
+
   User.toLogin(this.username, this.email, this.urlimage);
   User();
 }

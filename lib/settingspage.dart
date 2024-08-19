@@ -109,13 +109,27 @@ class SettingsState extends State {
               },
             ),
           ]),
-          TextButton(
-              style: const ButtonStyle(
-                  foregroundColor: MaterialStatePropertyAll(Colors.blue)),
-              onPressed: () {
-                Navigator.of(context).pushNamed('/about');
-              },
-              child: const Text("--Sobre--"))
+          Column(
+            children: [
+              TextButton(
+                  style: const ButtonStyle(
+                      foregroundColor: MaterialStatePropertyAll(Colors.blue)),
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/about');
+                  },
+                  child: const Text("--Sobre--")),
+              ElevatedButton(
+                  //Deletar conta
+                  onPressed: () {
+                    Navigator.of(context).pushNamed('/delete');
+                  },
+                  style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+                  child: const Text(
+                    "Deletar conta",
+                    style: TextStyle(color: Colors.white),
+                  ))
+            ],
+          ),
         ],
       )),
     );

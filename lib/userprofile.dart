@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comment.dart';
 import 'package:goalboxd/obj/user.dart';
+import 'package:goalboxd/widgets/displayname.dart';
 
 class UserProfile extends StatefulWidget {
   final User user;
@@ -92,7 +93,7 @@ class _UserProfileState extends State<UserProfile>
                     backgroundImage: NetworkImage(user.urlimage ??
                         'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')),
                 Center(
-                  child: Text(user.username),
+                  child: DisplayName(username: user.username),
                 ),
                 Center(
                   child: Text("Comentários: ${user.qtdComentarios}"),
@@ -127,7 +128,7 @@ class _UserProfileState extends State<UserProfile>
                 itemCount: repositoryProfileGame.comments.length,
                 itemBuilder: (context, index) {
                   return _buildCommentItem(
-                      repositoryProfileGame.comments[index]);
+                      repositoryProfileGame.comments[index], index);
                 },
               )
             ]),
@@ -139,7 +140,7 @@ class _UserProfileState extends State<UserProfile>
 
   Widget _buildReviewItem(ProfileGameReview review) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 50),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           Container(
@@ -166,28 +167,46 @@ class _UserProfileState extends State<UserProfile>
     );
   }
 
-  Widget _buildCommentItem(ProfileGameComment comment) {
+  Widget _buildCommentItem(ProfileGameComment comment, int index) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 50),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Container(
-            margin: const EdgeInsets.all(5),
-            child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                user.urlimage ??
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
-              ),
-            ),
-          ),
-          Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          Row(
             children: [
-              Text(user.username),
-              Text(comment.comment),
-              Text("${comment.game.team1name} x ${comment.game.team2name}"),
+              Container(
+                margin: const EdgeInsets.all(5),
+                child: CircleAvatar(
+                  backgroundImage: NetworkImage(
+                    user.urlimage ??
+                        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
+                  ),
+                ),
+              ),
+              Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(user.username),
+                  Text(comment.comment),
+                  Text("${comment.game.team1name} x ${comment.game.team2name}"),
+                ],
+              ),
             ],
           ),
+          IconButton(
+              onPressed: () async {
+                bool deletado = await Comments.deleteComment(comment.id);
+                if (deletado) {
+                  setState(() {
+                    repositoryProfileGame.comments.removeAt(index);
+                  });
+                }
+              },
+              icon: const Icon(
+                Icons.delete,
+                color: Colors.red,
+              ))
         ],
       ),
     );
