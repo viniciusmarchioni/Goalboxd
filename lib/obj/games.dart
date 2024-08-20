@@ -87,7 +87,7 @@ class GamesRepository extends ChangeNotifier {
   List<Games> now = [];
   List<Games> today = [];
 
-  Future<void> updateRise() async {
+  Future<void> updateRise([bool? first]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
@@ -100,13 +100,17 @@ class GamesRepository extends ChangeNotifier {
           games.add(Games.fromJsonAll(i));
         }
       } else if (response.statusCode == 401) {
-        prefs.clear();
         throw ExpiredToken('401');
       } else {
         games = [];
       }
     } on ExpiredToken {
-      rethrow;
+      if (first == true) {
+        games = [];
+      } else {
+        prefs.clear();
+        rethrow; //rethrow não funciona aqui, melhorar posteriormente
+      }
     } catch (e) {
       games = [];
     } finally {
@@ -114,7 +118,7 @@ class GamesRepository extends ChangeNotifier {
     }
   }
 
-  Future<void> updateNow() async {
+  Future<void> updateNow([bool? first]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
@@ -127,23 +131,26 @@ class GamesRepository extends ChangeNotifier {
           now.add(Games.fromJsonAll(i));
         }
       } else if (response.statusCode == 401) {
-        prefs.clear();
-        throw Exception('401');
+        throw ExpiredToken('401');
       } else {
         debugPrint("Erro");
         now = [];
       }
     } on ExpiredToken {
-      rethrow;
+      if (first == true) {
+        now = [];
+      } else {
+        prefs.clear();
+        rethrow; //rethrow não funciona aqui, arrumar posteriormente
+      }
     } catch (e) {
-      debugPrint("Erro");
       now = [];
     } finally {
       notifyListeners();
     }
   }
 
-  Future<void> updateToday() async {
+  Future<void> updateToday([bool? first]) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
@@ -156,16 +163,19 @@ class GamesRepository extends ChangeNotifier {
           today.add(Games.fromJsonAll(i));
         }
       } else if (response.statusCode == 401) {
-        prefs.clear();
-        throw Exception('401');
+        throw ExpiredToken('401');
       } else {
         debugPrint("Erro");
         today = [];
       }
     } on ExpiredToken {
-      rethrow;
+      if (first == true) {
+        now = [];
+      } else {
+        prefs.clear();
+        rethrow; //rethrow não funciona aqui, arrumar posteriormente
+      }
     } catch (e) {
-      debugPrint("Erro");
       today = [];
     } finally {
       notifyListeners();

@@ -16,39 +16,21 @@ void main() async {
   SharedPreferences prefs = await SharedPreferences.getInstance();
   await dotenv.load(fileName: ".env");
 
-  if (prefs.getInt('id') != null) {
-    runApp(ChangeNotifierProvider(
-      create: (context) => GamesRepository(),
-      child: MaterialApp(
-        home: const Menu(),
-        theme: ThemeData(useMaterial3: true),
-        title: 'Goalboxd',
-        routes: {
-          '/about': (context) => const About(),
-          '/login': (context) => const LoginPage(),
-          '/home': (context) => const Menu(),
-          '/settings': (context) => const Settings(),
-          '/delete': (context) => const DeletePage()
-        },
-      ),
-    ));
-  } else {
-    runApp(ChangeNotifierProvider(
-      create: (context) => GamesRepository(),
-      child: MaterialApp(
-        home: const LoginPage(),
-        theme: ThemeData(useMaterial3: true),
-        title: 'Goalboxd',
-        routes: {
-          '/about': (context) => const About(),
-          '/login': (context) => const LoginPage(),
-          '/home': (context) => const Menu(),
-          '/settings': (context) => const Settings(),
-          '/delete': (context) => const DeletePage()
-        },
-      ),
-    ));
-  }
+  runApp(ChangeNotifierProvider(
+    create: (context) => GamesRepository(),
+    child: MaterialApp(
+      home: prefs.getInt('id') != null ? const Menu() : const LoginPage(),
+      theme: ThemeData(useMaterial3: true),
+      title: 'Goalboxd',
+      routes: {
+        '/about': (context) => const About(),
+        '/login': (context) => const LoginPage(),
+        '/home': (context) => const Menu(),
+        '/settings': (context) => const Settings(),
+        '/delete': (context) => const DeletePage()
+      },
+    ),
+  ));
 }
 
 class LoginPage extends StatelessWidget {

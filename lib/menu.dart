@@ -37,12 +37,15 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
     final gamesRepository = Provider.of<GamesRepository>(context);
     if (iniciar) {
       try {
-        gamesRepository.updateRise();
-        gamesRepository.updateNow();
-        gamesRepository.updateToday();
+        gamesRepository.updateRise(true);
+        gamesRepository.updateNow(true);
+        gamesRepository.updateToday(true);
       } catch (e) {
+        /*
+        Infelizmente não vai cair aqui nunca, tentei de tudo,
+        então a solução temporária é ficar branco mesmo
         Navigator.of(context)
-            .pushNamedAndRemoveUntil('/login', (route) => false);
+            .pushNamedAndRemoveUntil('/login', (route) => false);*/
       }
       iniciar = false;
     }
@@ -187,7 +190,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                 if (now.isBefore(game.date!)) ...[
                   const Icon(Icons.timer_sharp),
                   Text(
-                      '${game.date!.hour.toString()}:${game.date!.minute.toString()}h')
+                      '${game.date!.hour.toString()}:${game.date!.minute.toString() == '0' ? '00' : game.date!.minute.toString()}h')
                 ] else ...[
                   const Icon(Icons.star_half_rounded),
                   Text(game.rate!.toStringAsFixed(1))
@@ -224,18 +227,22 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
   BoxBorder _borderDefine(String championship) {
     switch (championship) {
       case "CONMEBOL Libertadores":
-        const GradientBoxBorder(
-            gradient: SweepGradient(colors: [
-          Color.fromARGB(255, 218, 218, 52),
-          Colors.black,
-        ]));
+        return const GradientBoxBorder(
+            width: 2,
+            gradient: LinearGradient(colors: [
+              Color.fromARGB(255, 196, 196, 17),
+              Color.fromARGB(209, 39, 39, 39),
+              Color.fromARGB(255, 196, 196, 17),
+              Color.fromARGB(209, 39, 39, 39),
+            ]));
 
       case "CONMEBOL Sudamericana":
-        const GradientBoxBorder(
-            gradient: SweepGradient(colors: [
-          Color.fromARGB(255, 218, 218, 52),
-          Color.fromARGB(255, 0, 26, 255),
-        ]));
+        return const GradientBoxBorder(
+            width: 2,
+            gradient: LinearGradient(colors: [
+              Color.fromARGB(255, 0, 26, 255),
+              Color.fromARGB(255, 218, 218, 52),
+            ]));
 
       case "Serie A":
         return Border.all(color: Colors.blue);
