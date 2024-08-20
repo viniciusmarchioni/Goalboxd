@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'package:goalboxd/obj/error.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'dart:convert';
 import 'package:flutter/material.dart';
@@ -26,10 +27,13 @@ class Comments {
         urlImage: json['image']);
   }
   static Future<List<Comments>> getComments(int id, int page) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/games/comments/$id/$page'))
-          .timeout(const Duration(seconds: 5));
+      final response = await http.get(
+          Uri.parse('${dotenv.env['API_URL']}/games/comments/$id/$page'),
+          headers: {
+            'Authorization': prefs.getString('key')!
+          }).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         List<Comments> comments = [];
         for (var i in jsonDecode(response.body)) {
@@ -45,8 +49,8 @@ class Comments {
   }
 
   static Future<bool> postComment(int gameid, String comment) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      SharedPreferences prefs = await SharedPreferences.getInstance();
       final response = await http.post(
         Uri.parse('${dotenv.env['API_URL']}/games/comments'),
         body: jsonEncode({
@@ -56,7 +60,8 @@ class Comments {
         }),
         headers: {
           "Accept": "application/json",
-          "content-type": "application/json"
+          "content-type": "application/json",
+          'Authorization': prefs.getString('key')!
         },
       ).timeout(const Duration(seconds: 5));
 
@@ -68,21 +73,26 @@ class Comments {
     } on TimeoutException {
       debugPrint('----------------TIMEOUT------------');
       return false;
+    } on ExpiredToken {
+      rethrow;
     } catch (e) {
       return false;
     }
   }
 
   static Future<bool> deleteComment(int commentid) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final response = await http
-          .delete(
-            Uri.parse('${dotenv.env['API_URL']}/users/comment/$commentid'),
-          )
-          .timeout(const Duration(seconds: 5));
+      final response = await http.delete(
+          Uri.parse('${dotenv.env['API_URL']}/users/comment/$commentid'),
+          headers: {
+            'Authorization': prefs.getString('key')!
+          }).timeout(const Duration(seconds: 5));
 
       if (response.statusCode == 200) {
         return true;
+      } else if (response.statusCode == 401) {
+        throw ExpiredToken('401');
       } else {
         return false;
       }
@@ -124,16 +134,16 @@ class ProfileRepository {
   bool endReview = false;
 
   Future<void> setProfileComment(int? userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       if (!endComments) {
-        if (userId == null) {
-          SharedPreferences prefs = await SharedPreferences.getInstance();
-          userId = prefs.getInt('id');
-        }
-        final response = await http
-            .get(Uri.parse(
-                '${dotenv.env['API_URL']}/users/comment/$userId/$_pageComments'))
-            .timeout(const Duration(seconds: 5));
+        userId ??= prefs.getInt('id');
+        final response = await http.get(
+            Uri.parse(
+                '${dotenv.env['API_URL']}/users/comment/$userId/$_pageComments'),
+            headers: {
+              'Authorization': prefs.getString('key')!
+            }).timeout(const Duration(seconds: 5));
         if (response.statusCode == 200) {
           List<ProfileGameComment> profileGameComment = [];
           for (var i in jsonDecode(response.body)) {
@@ -153,16 +163,19 @@ class ProfileRepository {
   }
 
   Future<void> setProfileReview(int? userId) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     if (!endReview) {
       try {
         if (userId == null) {
           SharedPreferences prefs = await SharedPreferences.getInstance();
           userId = prefs.getInt('id');
         }
-        final response = await http
-            .get(Uri.parse(
-                '${dotenv.env['API_URL']}/users/review/$userId/$_pageReviews'))
-            .timeout(const Duration(seconds: 5));
+        final response = await http.get(
+            Uri.parse(
+                '${dotenv.env['API_URL']}/users/review/$userId/$_pageReviews'),
+            headers: {
+              'Authorization': prefs.getString('key')!
+            }).timeout(const Duration(seconds: 5));
         if (response.statusCode == 200) {
           List<ProfileGameReview> profileGameReview = [];
           for (var i in jsonDecode(response.body)) {

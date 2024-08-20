@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:goalboxd/obj/error.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class Complements {
   late String? urlImage;
@@ -15,9 +17,11 @@ class Complements {
         urlImage = json['url_image'];
 
   static Future<Complements> getTeam(String name) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      final response =
-          await http.get(Uri.parse('${dotenv.env['API_URL']}/teams/$name'));
+      final response = await http.get(
+          Uri.parse('${dotenv.env['API_URL']}/teams/$name'),
+          headers: {'Authorization': prefs.getString('key')!});
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -84,21 +88,26 @@ class GamesRepository extends ChangeNotifier {
   List<Games> today = [];
 
   Future<void> updateRise() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/games/rise'))
-          .timeout(const Duration(seconds: 5));
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/rise'), headers: {
+        'Authorization': prefs.getString('key')!
+      }).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         games = [];
         for (var i in jsonDecode(response.body)) {
           games.add(Games.fromJsonAll(i));
         }
+      } else if (response.statusCode == 401) {
+        prefs.clear();
+        throw ExpiredToken('401');
       } else {
-        debugPrint("Erro");
         games = [];
       }
+    } on ExpiredToken {
+      rethrow;
     } catch (e) {
-      debugPrint("Erro");
       games = [];
     } finally {
       notifyListeners();
@@ -106,19 +115,26 @@ class GamesRepository extends ChangeNotifier {
   }
 
   Future<void> updateNow() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/games/now'))
-          .timeout(const Duration(seconds: 5));
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/now'), headers: {
+        'Authorization': prefs.getString('key')!
+      }).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         now = [];
         for (var i in jsonDecode(response.body)) {
           now.add(Games.fromJsonAll(i));
         }
+      } else if (response.statusCode == 401) {
+        prefs.clear();
+        throw Exception('401');
       } else {
         debugPrint("Erro");
         now = [];
       }
+    } on ExpiredToken {
+      rethrow;
     } catch (e) {
       debugPrint("Erro");
       now = [];
@@ -128,19 +144,26 @@ class GamesRepository extends ChangeNotifier {
   }
 
   Future<void> updateToday() async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http
-          .get(Uri.parse('${dotenv.env['API_URL']}/games/today'))
-          .timeout(const Duration(seconds: 5));
+          .get(Uri.parse('${dotenv.env['API_URL']}/games/today'), headers: {
+        'Authorization': prefs.getString('key')!
+      }).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         today = [];
         for (var i in jsonDecode(response.body)) {
           today.add(Games.fromJsonAll(i));
         }
+      } else if (response.statusCode == 401) {
+        prefs.clear();
+        throw Exception('401');
       } else {
         debugPrint("Erro");
         today = [];
       }
+    } on ExpiredToken {
+      rethrow;
     } catch (e) {
       debugPrint("Erro");
       today = [];

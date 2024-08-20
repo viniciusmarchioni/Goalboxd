@@ -22,9 +22,14 @@ class _DisplayNameState extends State<DisplayName> {
 
   Future editName(String newName) async {
     User user = User();
-    await user.editUsername(sanitizeAndTrim(newName));
+    try {
+      await user.editUsername(sanitizeAndTrim(newName));
+    } catch (e) {
+      user.username = newName;
+    }
     setState(() {
       username = user.username;
+      isEditing = false;
     });
   }
 
@@ -51,13 +56,7 @@ class _DisplayNameState extends State<DisplayName> {
                 onSubmitted: (value) async {
                   if (value.isNotEmpty) {
                     await editName(value);
-                    setState(() {
-                      isEditing = false;
-                    });
                   }
-                  setState(() {
-                    isEditing = false;
-                  });
                 },
                 cursorColor: Colors.white,
                 decoration: InputDecoration(

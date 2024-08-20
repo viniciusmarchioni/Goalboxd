@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:goalboxd/obj/error.dart';
 import 'package:http/http.dart' as http;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -23,14 +24,13 @@ class User {
         urlimage = json['image'],
         id = json['userid'];
 
-  Future<void> getProfile(int? id) async {
+  Future getProfile(int? id) async {
+    SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      if (id == null) {
-        SharedPreferences prefs = await SharedPreferences.getInstance();
-        id = prefs.getInt('id') ?? 1;
-      }
-      final response =
-          await http.get(Uri.parse('${dotenv.env['API_URL']}/users/$id'));
+      id = prefs.getInt('id')!;
+      final response = await http.get(
+          Uri.parse('${dotenv.env['API_URL']}/users/$id'),
+          headers: {'Authorization': prefs.getString('key')!});
 
       if (response.statusCode == 200) {
         final Map<String, dynamic> data = json.decode(response.body);
@@ -40,17 +40,17 @@ class User {
         urlimage = user.urlimage;
         qtdComentarios = user.qtdComentarios;
         qtdNota = user.qtdNota;
-      } else if (response.statusCode == 400) {
-        throw 'Perfil inexistente';
+      } else if (response.statusCode == 401) {
+        throw ExpiredToken('401');
       } else {
-        throw 'Erro em buscar perfil';
+        throw Exception('Erro em buscar perfil');
       }
     } catch (e) {
-      throw 'Erro em buscar perfil';
+      rethrow;
     }
   }
 
-  Future<void> login() async {
+  Future login() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http.post(
@@ -68,6 +68,7 @@ class User {
       ).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
         final jsonResponse = json.decode(response.body);
+        prefs.setString('key', jsonResponse['token']);
         User user = User.fromJsonToLogin(jsonResponse);
         username = user.username;
         urlimage = user.urlimage;
@@ -88,7 +89,7 @@ class User {
     }
   }
 
-  Future<void> editUsername(String newName) async {
+  Future editUsername(String newName) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
       final response = await http.put(
@@ -99,7 +100,8 @@ class User {
         }),
         headers: {
           "Accept": "application/json",
-          "content-type": "application/json"
+          "content-type": "application/json",
+          'Authorization': prefs.getString('key')!
         },
       ).timeout(const Duration(seconds: 5));
       if (response.statusCode == 200) {
@@ -109,13 +111,15 @@ class User {
         id = user.id;
         prefs.setInt('id', id);
         prefs.setString('username', username);
+      } else if (response.statusCode == 401) {
+        throw ExpiredToken('401');
       } else {
         throw Exception('Erro response');
       }
     } on TimeoutException {
       throw Exception('Timeout');
     } catch (e) {
-      throw Exception('Erro Catch: $e');
+      rethrow;
     }
   }
 

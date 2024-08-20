@@ -48,9 +48,9 @@ class DeletePageState extends State {
               onPressed: !check
                   ? null
                   : () async {
+                      SharedPreferences prefs =
+                          await SharedPreferences.getInstance();
                       try {
-                        SharedPreferences prefs =
-                            await SharedPreferences.getInstance();
                         int userid = prefs.getInt('id')!;
                         final response = await http.delete(Uri.parse(
                             '${dotenv.env['API_URL']}/users/$userid'));
@@ -68,6 +68,7 @@ class DeletePageState extends State {
                           }
                         }
                       } catch (e) {
+                        prefs.clear();
                         if (mounted) {
                           Navigator.of(context).pushNamedAndRemoveUntil(
                               "/login", (route) => false);

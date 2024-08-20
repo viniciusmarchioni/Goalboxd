@@ -199,6 +199,7 @@ class _UserProfileState extends State<UserProfile>
                 bool deletado = await Comments.deleteComment(comment.id);
                 if (deletado) {
                   setState(() {
+                    user.qtdComentarios--;
                     repositoryProfileGame.comments.removeAt(index);
                   });
                 }

@@ -40,27 +40,38 @@ class _ReviewState extends State<Review> {
 
   Future postReview(int grade) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.post(
-      Uri.parse('${dotenv.env['API_URL']}/games/review'),
-      body: jsonEncode(
-          {'userid': prefs.getInt('id'), 'gameid': game.id, 'grade': grade}),
-      headers: {
-        "Accept": "application/json",
-        "content-type": "application/json"
-      },
-    ).timeout(const Duration(seconds: 5));
-    if (response.statusCode == 200) {
-      return;
-    } else {
-      debugPrint("Erro");
-      return;
+    try {
+      final response = await http.post(
+        Uri.parse('${dotenv.env['API_URL']}/games/review'),
+        body: jsonEncode(
+            {'userid': prefs.getInt('id'), 'gameid': game.id, 'grade': grade}),
+        headers: {
+          "Accept": "application/json",
+          "content-type": "application/json",
+          'Authorization': prefs.getString('key')!
+        },
+      ).timeout(const Duration(seconds: 5));
+      if (response.statusCode == 200) {
+        return;
+      } else {
+        debugPrint("Erro");
+        return;
+      }
+    } catch (e) {
+      prefs.clear();
+      if (mounted) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/login', (route) => false);
+      }
     }
   }
 
   Future<int> getReview() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    final response = await http.get(Uri.parse(
-        '${dotenv.env['API_URL']}/games/review/${game.id}/${prefs.getInt('id')}'));
+    final response = await http.get(
+        Uri.parse(
+            '${dotenv.env['API_URL']}/games/review/${game.id}/${prefs.getInt('id')}'),
+        headers: {'Authorization': prefs.getString('key')!});
     if (response.statusCode == 200) {
       final data = json.decode(response.body);
       return data['grade'];

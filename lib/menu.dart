@@ -36,9 +36,14 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
   Widget build(BuildContext context) {
     final gamesRepository = Provider.of<GamesRepository>(context);
     if (iniciar) {
-      gamesRepository.updateRise();
-      gamesRepository.updateNow();
-      gamesRepository.updateToday();
+      try {
+        gamesRepository.updateRise();
+        gamesRepository.updateNow();
+        gamesRepository.updateToday();
+      } catch (e) {
+        Navigator.of(context)
+            .pushNamedAndRemoveUntil('/login', (route) => false);
+      }
       iniciar = false;
     }
 
@@ -93,35 +98,59 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
           controller: _tabController,
           children: [
             RefreshIndicator(
+              color: Colors.blue,
               onRefresh: () async {
-                gamesRepository.updateRise();
+                try {
+                  await gamesRepository.updateRise();
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login', (route) => false);
+                  }
+                }
               },
               child: ListView.builder(
                 itemCount: gamesRepository.games.length,
                 itemBuilder: (context, index) {
-                  return _listPlaceHolder2(gamesRepository.games[index]);
+                  return _listPlaceHolder(gamesRepository.games[index]);
                 },
               ),
             ),
             RefreshIndicator(
+              color: Colors.blue,
               onRefresh: () async {
-                gamesRepository.updateNow();
+                try {
+                  await gamesRepository.updateNow();
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login', (route) => false);
+                  }
+                }
               },
               child: ListView.builder(
                 itemCount: gamesRepository.now.length,
                 itemBuilder: (context, index) {
-                  return _listPlaceHolder2(gamesRepository.now[index]);
+                  return _listPlaceHolder(gamesRepository.now[index]);
                 },
               ),
             ),
             RefreshIndicator(
+              color: Colors.blue,
               onRefresh: () async {
-                gamesRepository.updateToday();
+                try {
+                  await gamesRepository.updateToday();
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login', (route) => false);
+                  }
+                }
               },
               child: ListView.builder(
                 itemCount: gamesRepository.today.length,
                 itemBuilder: (context, index) {
-                  return _listPlaceHolder2(gamesRepository.today[index]);
+                  return _listPlaceHolder(gamesRepository.today[index]);
                 },
               ),
             )
@@ -129,7 +158,7 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
         ));
   }
 
-  GestureDetector _listPlaceHolder2(Games game) {
+  GestureDetector _listPlaceHolder(Games game) {
     DateTime now = DateTime.now();
     return GestureDetector(
       onTap: () {
@@ -238,14 +267,20 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
               child: const Text('Perfil'),
               onTap: () async {
                 User user = User();
-                SharedPreferences prefs = await SharedPreferences.getInstance();
-                await user.getProfile(prefs.getInt('id')!);
-                if (context.mounted) {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                    return UserProfile(
-                      user: user,
-                    );
-                  }));
+                try {
+                  await user.getProfile(prefs.getInt('id')!);
+                  if (context.mounted) {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                      return UserProfile(
+                        user: user,
+                      );
+                    }));
+                  }
+                } catch (e) {
+                  if (mounted) {
+                    Navigator.of(context)
+                        .pushNamedAndRemoveUntil('/login', (route) => false);
+                  }
                 }
               },
             ),
@@ -282,16 +317,21 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
                   PopupMenuItem(
                     onTap: () async {
                       User user = User();
-                      SharedPreferences prefs =
-                          await SharedPreferences.getInstance();
-                      await user.getProfile(prefs.getInt('id')!);
-                      if (context.mounted) {
-                        Navigator.of(context)
-                            .push(MaterialPageRoute(builder: (_) {
-                          return UserProfile(
-                            user: user,
-                          );
-                        }));
+                      try {
+                        await user.getProfile(prefs.getInt('id')!);
+                        if (context.mounted) {
+                          Navigator.of(context)
+                              .push(MaterialPageRoute(builder: (_) {
+                            return UserProfile(
+                              user: user,
+                            );
+                          }));
+                        }
+                      } catch (e) {
+                        if (mounted) {
+                          Navigator.of(context).pushNamedAndRemoveUntil(
+                              '/login', (route) => false);
+                        }
                       }
                     },
                     child: const Text('Perfil'),

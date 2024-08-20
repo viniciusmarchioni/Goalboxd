@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:goalboxd/obj/comment.dart';
+import 'package:goalboxd/obj/error.dart';
 import 'package:goalboxd/obj/games.dart';
 import 'package:goalboxd/obj/user.dart';
 import 'package:goalboxd/otheruserprofile.dart';
@@ -90,7 +91,14 @@ class _CommentWidgetState extends State<CommentWidget> {
                   ElevatedButton(
                     onPressed: () async {
                       if (controller.text.isNotEmpty) {
-                        await Comments.postComment(game.id!, controller.text);
+                        try {
+                          await Comments.postComment(game.id!, controller.text);
+                        } catch (e) {
+                          if (mounted) {
+                            Navigator.of(context)
+                                .pushReplacementNamed('/login');
+                          }
+                        }
                         controller.clear();
                       }
                     },
@@ -123,13 +131,22 @@ class _ComentarioPlaceholder extends StatelessWidget {
           RawMaterialButton(
               onPressed: () async {
                 User user = User();
-                await user.getProfile(comment.userid);
-                if (context.mounted) {
-                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                    return OtherUserProfile(
-                      user: user,
-                    );
-                  }));
+                try {
+                  await user.getProfile(comment.userid);
+                  if (context.mounted) {
+                    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                      return OtherUserProfile(
+                        user: user,
+                      );
+                    }));
+                  }
+                } catch (e) {
+                  if (e is ExpiredToken) {
+                    if (context.mounted) {
+                      Navigator.of(context)
+                          .pushNamedAndRemoveUntil('/login', (route) => false);
+                    }
+                  }
                 }
               },
               child: CircleAvatar(
