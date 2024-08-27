@@ -27,7 +27,7 @@ class User {
   Future getProfile(int? id) async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
     try {
-      id = prefs.getInt('id')!;
+      id ??= prefs.getInt('id')!;
       final response = await http.get(
           Uri.parse('${dotenv.env['API_URL']}/users/$id'),
           headers: {'Authorization': prefs.getString('key')!});
@@ -75,10 +75,9 @@ class User {
         id = user.id;
         prefs.setInt('id', id);
         prefs.setString('username', username);
-        prefs.setString(
-            'image',
-            urlimage ??
-                'https://upload.wikimedia.org/wikipedia/commons/9/99/Sample_User_Icon.png');
+        if (urlimage != null) {
+          prefs.setString('image', urlimage!);
+        }
       } else {
         throw Exception('Erro response');
       }

@@ -139,17 +139,15 @@ class _OtherUserProfileState extends State<OtherUserProfile>
 
   Widget _buildReviewItem(ProfileGameReview review) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 50),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           Container(
             margin: const EdgeInsets.all(5),
             child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                user.urlimage ??
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
-              ),
-            ),
+                backgroundImage: user.urlimage != null
+                    ? NetworkImage(user.urlimage!)
+                    : const AssetImage('assets/userIcon.png') as ImageProvider),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -168,17 +166,15 @@ class _OtherUserProfileState extends State<OtherUserProfile>
 
   Widget _buildCommentItem(ProfileGameComment comment) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 50),
+      margin: const EdgeInsets.only(bottom: 10),
       child: Row(
         children: [
           Container(
             margin: const EdgeInsets.all(5),
             child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                user.urlimage ??
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
-              ),
-            ),
+                backgroundImage: user.urlimage != null
+                    ? NetworkImage(user.urlimage!)
+                    : const AssetImage('assets/userIcon.png') as ImageProvider),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,

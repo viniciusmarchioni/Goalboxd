@@ -90,8 +90,10 @@ class _UserProfileState extends State<UserProfile>
               children: [
                 CircleAvatar(
                     maxRadius: 50,
-                    backgroundImage: NetworkImage(user.urlimage ??
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png')),
+                    backgroundImage: user.urlimage != null
+                        ? NetworkImage(user.urlimage!)
+                        : const AssetImage('assets/userIcon.png')
+                            as ImageProvider),
                 Center(
                   child: DisplayName(username: user.username),
                 ),
@@ -146,11 +148,9 @@ class _UserProfileState extends State<UserProfile>
           Container(
             margin: const EdgeInsets.all(5),
             child: CircleAvatar(
-              backgroundImage: NetworkImage(
-                user.urlimage ??
-                    'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
-              ),
-            ),
+                backgroundImage: user.urlimage != null
+                    ? NetworkImage(user.urlimage!)
+                    : const AssetImage('assets/userIcon.png') as ImageProvider),
           ),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -178,11 +178,10 @@ class _UserProfileState extends State<UserProfile>
               Container(
                 margin: const EdgeInsets.all(5),
                 child: CircleAvatar(
-                  backgroundImage: NetworkImage(
-                    user.urlimage ??
-                        'https://upload.wikimedia.org/wikipedia/commons/thumb/5/59/User-avatar.svg/2048px-User-avatar.svg.png',
-                  ),
-                ),
+                    backgroundImage: user.urlimage != null
+                        ? NetworkImage(user.urlimage!)
+                        : const AssetImage('assets/userIcon.png')
+                            as ImageProvider),
               ),
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,

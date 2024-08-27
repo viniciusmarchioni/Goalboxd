@@ -223,7 +223,6 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
     );
   }
 
-  //CONMEBOL Libertadores
   BoxBorder _borderDefine(String championship) {
     switch (championship) {
       case "CONMEBOL Libertadores":
@@ -260,109 +259,58 @@ class _MyHomePageState extends State<Menu> with TickerProviderStateMixin {
 
   Future<Widget?> _userImage() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    if (prefs.getString('image') != null) {
-      return Container(
-        margin: const EdgeInsets.all(10),
-        child: PopupMenuButton(
-          tooltip: 'Mostrar opções',
-          icon: CircleAvatar(
-            backgroundImage: NetworkImage(prefs.getString('image')!),
-            maxRadius: 20,
-          ),
-          itemBuilder: (context) => [
-            PopupMenuItem(
-              child: const Text('Perfil'),
-              onTap: () async {
-                User user = User();
-                try {
-                  await user.getProfile(prefs.getInt('id')!);
-                  if (context.mounted) {
-                    Navigator.of(context).push(MaterialPageRoute(builder: (_) {
-                      return UserProfile(
-                        user: user,
-                      );
-                    }));
-                  }
-                } catch (e) {
-                  if (mounted) {
-                    Navigator.of(context)
-                        .pushNamedAndRemoveUntil('/login', (route) => false);
-                  }
-                }
-              },
-            ),
-            PopupMenuItem(
-              onTap: () {
-                Navigator.of(context).pushNamed('/settings');
-              },
-              child: const Text('Configurações'),
-            ),
-            PopupMenuItem(
-              onTap: () {
-                prefs.clear();
-                Navigator.of(context).pushAndRemoveUntil(
-                  MaterialPageRoute(
-                    builder: (context) => const LoginPage(),
-                  ),
-                  (Route<dynamic> route) => false,
-                );
-              },
-              child: const Text('Sair'),
-            ),
-          ],
-        ),
-      );
-    }
     return Container(
       margin: const EdgeInsets.all(10),
-      child: IconButton(
-          iconSize: 20,
-          icon: const CircleAvatar(
-              backgroundImage: AssetImage('yuri.jpg'), maxRadius: 20),
-          onPressed: () => PopupMenuButton(
-                itemBuilder: (context) => [
-                  PopupMenuItem(
-                    onTap: () async {
-                      User user = User();
-                      try {
-                        await user.getProfile(prefs.getInt('id')!);
-                        if (context.mounted) {
-                          Navigator.of(context)
-                              .push(MaterialPageRoute(builder: (_) {
-                            return UserProfile(
-                              user: user,
-                            );
-                          }));
-                        }
-                      } catch (e) {
-                        if (mounted) {
-                          Navigator.of(context).pushNamedAndRemoveUntil(
-                              '/login', (route) => false);
-                        }
-                      }
-                    },
-                    child: const Text('Perfil'),
-                  ),
-                  PopupMenuItem(
-                    onTap: () {
-                      Navigator.of(context).pushNamed('/settings');
-                    },
-                    child: const Text('Configurações'),
-                  ),
-                  PopupMenuItem(
-                    onTap: () {
-                      prefs.clear();
-                      Navigator.of(context).pushAndRemoveUntil(
-                        MaterialPageRoute(
-                          builder: (context) => const LoginPage(),
-                        ),
-                        (Route<dynamic> route) => false,
-                      );
-                    },
-                    child: const Text('Sair'),
-                  ),
-                ],
-              )),
+      child: PopupMenuButton(
+        tooltip: 'Mostrar opções',
+        icon: CircleAvatar(
+          backgroundImage: prefs.getString('image') != null
+              ? NetworkImage(prefs.getString('image')!)
+              : const AssetImage('assets/userIcon.png') as ImageProvider,
+          maxRadius: 20,
+        ),
+        itemBuilder: (context) => [
+          PopupMenuItem(
+            child: const Text('Perfil'),
+            onTap: () async {
+              User user = User();
+              try {
+                await user.getProfile(prefs.getInt('id')!);
+                if (context.mounted) {
+                  Navigator.of(context).push(MaterialPageRoute(builder: (_) {
+                    return UserProfile(
+                      user: user,
+                    );
+                  }));
+                }
+              } catch (e) {
+                if (mounted) {
+                  Navigator.of(context)
+                      .pushNamedAndRemoveUntil('/login', (route) => false);
+                }
+              }
+            },
+          ),
+          PopupMenuItem(
+            onTap: () {
+              Navigator.of(context).pushNamed('/settings');
+            },
+            child: const Text('Configurações'),
+          ),
+          PopupMenuItem(
+            onTap: () {
+              prefs.clear();
+              Navigator.of(context).pushAndRemoveUntil(
+                MaterialPageRoute(
+                  builder: (context) => const LoginPage(),
+                ),
+                (Route<dynamic> route) => false,
+              );
+            },
+            child: const Text('Sair'),
+          ),
+        ],
+      ),
     );
   }
 }
